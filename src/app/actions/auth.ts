@@ -35,7 +35,7 @@ export const handleSubmit = async (prevstate: FormState, form: FormData) => {
   // const data = JSON.stringify({formData: {
   //     email: email,
   //     password: password,
-  //     role: "admin",
+  //     role: "driver",
   //   }})
   // const response = await fetch(new URL("/api/register","http://localhost:3000"),{
   //   method: "POST",

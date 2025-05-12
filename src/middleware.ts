@@ -3,7 +3,7 @@ import { decrypt } from '@/app/lib/session'
 import { cookies } from 'next/headers'
  
 // 1. Specify protected and public routes
-const protectedRoutes = ['/dashboard']
+const protectedRoutes = ['/dashboard','/driver']
 const publicRoutes = ['/login', '/signup','/']
  
 export default async function middleware(req: NextRequest) {
@@ -26,7 +26,22 @@ export default async function middleware(req: NextRequest) {
   }
  
   // 5. Redirect to /dashboard if the user is authenticated and admin
+  if(session?.userId){
+    if(session?.role === 'admin' && !req.nextUrl.pathname.startsWith('/dashboard')){
+      return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
+    }else if(session?.role === 'driver' && !req.nextUrl.pathname.startsWith('/driver')){
+      return NextResponse.redirect(new URL('/driver', req.nextUrl))
+    }
+  }
+
   if (
+    isPublicRoute &&
+    session?.userId &&
+    session?.role === 'driver' &&
+    !req.nextUrl.pathname.startsWith('/driver')
+  ){
+    return NextResponse.redirect(new URL('/driver', req.nextUrl))
+  }else if (
     isPublicRoute &&
     session?.userId &&
     session?.role === 'admin' &&
