@@ -216,7 +216,7 @@ const HeaderNav = (props: HeaderNavProps) => {
             placeholder="search"
             rightSection={<IconSearch size={ICON_SIZE} />}
             ml="md"
-            style={{ width: 'auto'}}
+            style={{ width: tablet_match ? 'auto' : rem(400)}}
           />
         )}
       </Group>
