@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 import { AppShell, Container, rem, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useLocalStorage, useMediaQuery } from '@mantine/hooks';
 
-import AppMain from '@/components/AppMain';
+import AppMain from '@/components/AppMain/';
 import HeaderNav from '@/components/HeaderNav';
 import Navigation from '@/components/Navigation';
 

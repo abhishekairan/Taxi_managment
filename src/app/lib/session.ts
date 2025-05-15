@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { users } from '@/db/schema'
 
-interface SessionPayload {
+export interface SessionPayload {
   [userId: string]: string
   email: string;
   role: string;
@@ -30,7 +30,7 @@ export async function decrypt(session: string | undefined = '') {
     return payload
   } catch (error) {
     console.log('Failed to verify session')
-    return null
+    return undefined
   }
 }
 

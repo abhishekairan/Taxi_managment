@@ -62,21 +62,8 @@ const HeaderNav = (props: HeaderNavProps) => {
           size="sm"
         />
         {/* <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="md" size="sm"/> */}
-        {!mobile_match && (
-          <TextInput
-            placeholder="search"
-            rightSection={<IconSearch size={ICON_SIZE} />}
-            ml="md"
-            style={{ width: tablet_match ? 'auto' : rem(400)}}
-          />
-        )}
       </Group>
       <Group>
-        {mobile_match && (
-          <ActionIcon>
-            <IconSearch size={ICON_SIZE} />
-          </ActionIcon>
-        )}
         <Tooltip label="Logout">
           <ActionIcon onClick={()=> router.replace('/logout')}>
             <IconPower size={ICON_SIZE} />

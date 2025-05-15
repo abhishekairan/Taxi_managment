@@ -143,7 +143,7 @@ const Navigation = ({
   onSidebarStateChange,
   sidebarState,
 }: NavigationProps) => {
-  const tablet_match = useMediaQuery('(max-width: 768px)');
+  const tablet_match = useMediaQuery('(max-zwidth: 768px)');
 
   const links = mockdata.map((m) => (
     <Box key={m.title} pl={0} mb={sidebarState === 'mini' ? 0 : 'md'}>
