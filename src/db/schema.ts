@@ -14,7 +14,7 @@ export const users = sqliteTable('users', {
 
 export const vehicles = sqliteTable('vehicles', {
   id: int('id').primaryKey(),
-  vehicle_number: text('vehicle_number'),
+  vehicle_number: text('vehicle_number').notNull(),
   speedometer_reading: int('speedometer_reading'),
   default_passenger: text('default_passenger'),
   default_from_location: text('default_from_location'),

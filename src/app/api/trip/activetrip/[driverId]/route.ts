@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, {params}: {params: Promise<{driverId
     const {driverId} = await params
     // console.log(driverId)
     const response = await getActiveTripByDriverId(Number(driverId));
-    console.log("Response",response)
+    // console.log("Response",response)
     // console.log("Api data",data)
     return NextResponse.json(response,{status: 200});
 }

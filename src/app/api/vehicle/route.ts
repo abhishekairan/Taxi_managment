@@ -1,5 +1,5 @@
 import { createVehicle, getAllVehicles } from "@/db/utilis";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     // const token = req.headers.get("Authorization");
@@ -18,7 +18,8 @@ export async function GET(req: NextRequest) {
     if (!response) {
         return new Response("No users found", { status: 404 });
     }
-    return new Response(JSON.stringify(response), { status: 200 });
+    return NextResponse.json(response,{status: 200});
+    // return new Response(JSON.stringify(response), { status: 200 });
 }
 
 export async function PUT(req: NextRequest) {
