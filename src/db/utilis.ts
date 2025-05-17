@@ -176,6 +176,7 @@ export async function createTrip(data: any) {
     vehicleId = vehicle.id;
   }
 
+  await db.update(vehicles).set({speedometer_reading:data.start_reading}).where(eq(vehicles.id,Number(data.vehicle_id)))
   const response = await db.insert(trips).values({ ...data, driver_id: driverId, vehicle_id: vehicleId });
 
   return NextResponse.json(response, { status: 200 });
@@ -201,12 +202,11 @@ export async function updateTrip(id: number, updates: any) {
     } else {
       const vehicle = await getVehicleById(updates.vehicle_id);
       if (!vehicle) throw new Error('Invalid vehicle ID');
-      return NextResponse.error();
     }
   }
-
-  const repsone = await db.update(trips).set(updates).where(eq(trips.id, id));
-  return NextResponse.json(repsone, { status: 200 });
+  await db.update(vehicles).set({speedometer_reading:updates.end_reading}).where(eq(vehicles.id,Number(updates.vehicle_id)))
+  const response = await db.update(trips).set(updates).where(eq(trips.id, id));
+  return NextResponse.json(response, { status: 200 });
 }
 
 export async function deleteTrip(id: number) {

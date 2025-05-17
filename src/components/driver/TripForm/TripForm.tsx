@@ -21,6 +21,8 @@ import { useForm } from '@mantine/form';
 import Surface from '@/components/Surface/Surface';
 import { JWTPayload } from 'jose';
 import { vehicles } from '@/db/schema';
+import submitTrip, { formProps } from '@/app/actions/submitTrip';
+import { useRouter } from 'next/navigation';
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',
@@ -54,22 +56,51 @@ interface formDataProps{
     end_time?: string;
     isRunning?: boolean
   }
-  user?: JWTPayload;
+  user?: any
   vehicles: typeof vehicles.$inferSelect[]
 }
 
 const TripForm = (formData: formDataProps) => {
-  const formdata = useForm({
-    initialValues: {...formData},
-  });
 
-  console.log("formdata:",formdata.values)
-  
+  console.log('Client reloaded')
+
+  const router = useRouter()
+
+  const formdata = useForm({
+    initialValues: {
+      'id': formData.data?.id,
+      'driver_id':formData.user?.userId,
+      'vehicle_id': String(formData.data?.vehicle_id?.id),
+      'passenger_name': formData.data?.passenger_name || formData.data?.vehicle_id?.default_passenger || '',
+      'from_location': formData.data?.from_location || formData.data?.vehicle_id?.default_from_location,
+      'to_location': formData.data?.to_location || formData.data?.vehicle_id?.default_to_location,
+      'start_reading': formData.data?.start_reading,
+      'end_reading': formData.data?.end_reading,
+      'isRunning': formData.data?.isRunning || false
+    },
+    mode:'uncontrolled',
+    validate:{
+      end_reading: (value:number|undefined,values)=>{
+        if(values.isRunning){
+          if(!value){
+            return "End reading is required"
+          }else if(values.start_reading && value<values.start_reading){
+            return "Invalid reading"
+          }
+        }
+      }
+    }
+  });
+  const onChangeVehiclee = (value: string | null, obj: ComboboxItem) => {
+    const vehicleObj = formData.vehicles.find((e)=>{return e.id===Number(value)})
+    formdata.setValues({'from_location': vehicleObj?.default_from_location || undefined,'to_location': vehicleObj?.default_to_location || undefined,'vehicle_id': value || '',passenger_name: vehicleObj?.default_passenger || undefined,'start_reading': vehicleObj?.speedometer_reading || undefined})
+  }
+
   // console.log("formdata:",formdata)
   // formdata.setFieldValue('isRunning', false);
   return (
     <>
-      <form onSubmit={formdata.onSubmit((values) => console.log(values))}>
+      <form onSubmit={formdata.onSubmit(submitTrip)}>
       <Container fluid>
         <Stack gap="lg">
           <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
@@ -87,49 +118,52 @@ const TripForm = (formData: formDataProps) => {
                   <Select 
                     label="Select vehicle"
                     placeholder="Select vehicle"
-                    data={formdata.values.vehicles.map((vehicle) => ({value: String(vehicle.id), label: vehicle.vehicle_number}))}
-                    value={formdata.values.data?.isRunning? String(formdata.values.data.vehicle_id?.id) : undefined}
-                    disabled={formdata.values.data?.isRunning}
+                    data={formData.vehicles.map((vehicle) => ({value: String(vehicle.id), label: vehicle.vehicle_number}))}
+                    key={formdata.key('vehicle_id')}
+                    {...formdata.getInputProps('vehicle_id')}
+                    onChange={onChangeVehiclee}
                   />
                   <TextInput
                     label="Passenger name"
-                    placeholder={formdata.values.data?.vehicle_id?.default_passenger? formdata.values.data.vehicle_id?.default_passenger : "Passenger name"}
+                    placeholder={formdata.values.passenger_name || "Passenger name"}
+                    disabled={formdata.values.isRunning}
                     key={formdata.key('passenger_name')}
-                    {...formdata.getInputProps('email')}
-                    disabled={formdata.values.data?.isRunning}
-                    value={formdata.values.data?.isRunning? formdata.values.data.passenger_name : undefined}
+                    {...formdata.getInputProps('passenger_name')}
                   />
                   <TextInput
                     label="From Location"
-                    placeholder={formdata.values.data?.vehicle_id?.default_passenger? formdata.values.data.vehicle_id?.default_passenger : "From location"}
-                    {...formdata.getInputProps('address')}
+                    placeholder={formdata.values.from_location || "From location"}
+                    key={formdata.key('from_location')}
+                    {...formdata.getInputProps('from_location')}
                   />
                   <TextInput
                     label="To Location"
                     placeholder="To location"
-                    {...formdata.getInputProps('address')}
+                    key={formdata.key('to_location')}
+                    {...formdata.getInputProps('to_location')}
 
                   />
                   <Group grow>
                     <NumberInput
-                      disabled={formdata.values.data?.isRunning}
+                      disabled={formdata.values.isRunning}
                       label="Start Reading"
                       placeholder="Start reading"
-                      {...formdata.getInputProps('email')}
-                      value={formdata.values.data?.isRunning? formdata.values.data.start_reading : undefined}
+                      key={formdata.key('start_reading')}
+                      {...formdata.getInputProps('start_reading')}
                     />
                     <NumberInput 
-                      disabled={!formdata.getInputProps('isRunning')}
+                      disabled={!formdata.values.isRunning}
                       label="End Reading"
                       placeholder="End reading"
-                      {...formdata.getInputProps('email')}
+                      key={formdata.key('end_reading')}
+                      {...formdata.getInputProps('end_reading')}
                     />
                   </Group>
                   <Group grow justify='center'>
-                    <Button disabled={formData.data?.isRunning} color='green' leftSection={<IconCar size={16} type='submit'/>}>
+                    <Button type='submit' disabled={formdata.values.isRunning} color='green' leftSection={<IconCar size={16}/>}>
                       Start Trip
                     </Button>
-                    <Button disabled={!formData.data?.isRunning} color='red' leftSection={<IconBusStop size={16} />}>
+                    <Button type='submit' disabled={!formdata.values.isRunning} color='red' leftSection={<IconBusStop size={16}/>}>
                       End Trip
                     </Button>
                   </Group>

@@ -1,6 +1,5 @@
 import { useUser } from '@/hooks/useUser'
 import TripForm from '@/components/driver/TripForm';
-import { vehicles } from '@/db/schema';
 
 async function Page() {
   const user = await useUser();
@@ -14,9 +13,10 @@ async function Page() {
   const vehiclesResponse = await fetch(new URL('/api/vehicle', 'http://localhost:3000'),)
   const vehicles = await vehiclesResponse.json()
   const data = await response.json()
-  console.log("user: ",user)
-  console.log("data: ",data)
-  console.log("vehicles: ",vehicles)
+  // console.log("user: ",user)
+  // console.log("data: ",data)
+  // console.log("vehicles: ",vehicles)
+  // console.log("reloaded")
   return (
     <TripForm data={data} user={user} vehicles={vehicles}></TripForm>
   )
