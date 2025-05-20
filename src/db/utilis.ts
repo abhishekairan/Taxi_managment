@@ -152,33 +152,14 @@ export async function getTrip(id: number) {
   };
 }
 
-export async function createTrip(data: any) {
-  let driverId: number;
-  let vehicleId: number;
+export async function createTrip(data: TripsDBType) {
 
-  if (typeof data.driver_id === 'object') {
-    const driver = await getUserById(data.driver_id.id);
-    if (!driver) throw new Error('Invalid driver object');
-    driverId = driver.id;
-  } else {
-    const driver = await getUserById(data.driver_id);
-    if (!driver) throw new Error('Invalid driver ID');
-    driverId = driver.id;
+  await db.update(vehicles).set({speedometer_reading:data.start_reading}).where(eq(vehicles.vehicle_number,data.vehicle_number))
+  const response = await db.insert(trips).values(data);
+  if(response.lastInsertRowid){
+    const newField = await getTrip(Number(response.lastInsertRowid))
+    return NextResponse.json(newField, { status: 200 });
   }
-
-  if (typeof data.vehicle_id === 'object') {
-    const vehicle = await getVehicleById(data.vehicle_id.id);
-    if (!vehicle) throw new Error('Invalid vehicle object');
-    vehicleId = vehicle.id;
-  } else {
-    const vehicle = await getVehicleById(data.vehicle_id);
-    if (!vehicle) throw new Error('Invalid vehicle ID');
-    vehicleId = vehicle.id;
-  }
-
-  await db.update(vehicles).set({speedometer_reading:data.start_reading}).where(eq(vehicles.id,Number(data.vehicle_id)))
-  const response = await db.insert(trips).values({ ...data, driver_id: driverId, vehicle_id: vehicleId });
-
   return NextResponse.json(response, { status: 200 });
 }
 
@@ -187,7 +168,7 @@ export async function updateTrip(id: number, data: TripsDBType) {
   if(updates.success){
     // console.log(updates.data)
     await db.update(trips).set(updates.data).where(eq(trips.id, id));
-    const updatedData = await getTrip(updates.data.id) 
+    const updatedData = await getTrip(id) 
     return NextResponse.json(updatedData, { status: 200 });
   }else{
     return null

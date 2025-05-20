@@ -1,12 +1,6 @@
 import { z } from 'zod'
 
 
-
-// ----- Schema & Types for Forms ----- 
-
-
-
-
 // ----- Schema & Types for database tables ----- 
 
 // User Schema
@@ -37,14 +31,14 @@ export type VehicleDBType = z.infer<typeof VehcileDBSchema>
 
 // Trips Schema
 export const TripsDBSchema = z.object({
-  id: z.number(),
-  driver_id: z.number(),
-  vehicle_number: z.string(),
-  passenger_name: z.string(),
-  from_location: z.string(),
-  to_location: z.string(),
-  start_reading: z.number(),
-  end_reading: z.number().optional(),
+  id: z.coerce.number().optional(),
+  driver_id: z.coerce.number(),
+  vehicle_number: z.string().nonempty("Select a vehicle"),
+  passenger_name: z.string().nonempty("Enter Passenger Name"),
+  from_location: z.string().nonempty("Enter From location"),
+  to_location: z.string().nonempty("Enter To Location"),
+  start_reading: z.coerce.number(),
+  end_reading: z.coerce.number().optional().nullable(),
   start_time: z.string().optional(),
   end_time: z.coerce.string(),
   isRunning: z.boolean(),
@@ -62,3 +56,17 @@ export const ExpenseDBSchema = z.object({
 })
 // Expense Type
 export type ExpenseDBType = z.infer<typeof ExpenseDBSchema>
+
+
+
+// ----- Schema & Types for Forms ----- 
+export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
+  if(value.end_reading){
+    return value.end_reading>=value.start_reading
+  }
+},{
+  message: "Invalid End Reading",
+  path: ['end_reading']
+})
+export type TripFormObject = z.infer<typeof TripFormSchema>
+

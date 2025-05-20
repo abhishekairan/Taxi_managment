@@ -1,5 +1,6 @@
 import { useUser } from '@/hooks/useUser'
 import TripForm from '@/components/driver/TripForm';
+import { TripFormObject, TripFormSchema } from '@/lib/type';
 
 export async function submitTrip(prevstate:any,formdata: FormData){
   return prevstate
@@ -23,9 +24,28 @@ async function Page() {
     }
   })
   const data = await response.json()
-
+  console.log(data)
+  if(!data){
+    const newdata = {
+      driver_id: user?.userId || 0,
+      vehicle_number: '', 
+      passenger_name: '',
+      from_location: '',
+      to_location: '',
+      start_reading: 0,
+      end_reading: 0,
+      start_time: '',
+      end_time: '',
+      isRunning: false
+    }
+    console.log("No Active Trip found")
+    return (
+      <TripForm formData={newdata}></TripForm>
+    )
+  }
+  console.log("active trip found")
   return (
-    <TripForm user={user}></TripForm>
+    <TripForm formData={data}></TripForm>
   )
 }
 

@@ -18,9 +18,8 @@ import {
 import { IconBusStop, IconCar } from "@tabler/icons-react";
 import Surface from "@/components/Surface/Surface";
 import { useForm } from "react-hook-form";
-import { TripsDBSchema, TripsDBType, VehicleDBType } from "@/lib/type";
+import { TripFormObject, TripFormSchema, VehicleDBType } from "@/lib/type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import submitTrip from "@/app/actions/submitTrip";
 
 const PAPER_PROPS: PaperProps = {
@@ -42,9 +41,9 @@ if (vehiclesResponse) {
   });
 }
 
-const TripForm = ({ user }: any) => {
+const TripForm = ({ formData }: any) => {
   // Getting Active Trip
-  const [formData, setformData] = useState<TripsDBType>();
+  // const [formData, setformData] = useState<TripsDBType>();
 
   // react-hook-form
   const {
@@ -53,47 +52,11 @@ const TripForm = ({ user }: any) => {
     getValues,
     setValue,
     handleSubmit,
-    reset
-  } = useForm<TripsDBType>({
-    resolver: zodResolver(TripsDBSchema),
+    reset,
+  } = useForm<TripFormObject>({
+    resolver: zodResolver(TripFormSchema),
     defaultValues: formData
   });
-
-  useEffect(() => {
-    const data = async () => {
-      const response = await fetch(
-        new URL(
-          `/api/trip/activetrip/${user?.userId}`,
-          "http://localhost:3000"
-        )
-      );
-      const data = await response.json();
-      console.log("trip:", data);
-      const verifiedData = TripsDBSchema.safeParse(data);
-      if (verifiedData.success) {
-        // console.log("verified Data: ",verifiedData)
-        setformData(data);
-      }
-      // else{
-      //   console.log("Error in data: ",verifiedData.error)
-      // }
-    };
-    data();
-  }, []);
-
-  useEffect(() => {
-    setValue("id", formData?.id || 0);
-    setValue("driver_id", formData?.driver_id || user.useId);
-    setValue("vehicle_number", formData?.vehicle_number || "");
-    setValue("passenger_name", formData?.passenger_name || "");
-    setValue("from_location", formData?.from_location || "");
-    setValue("to_location", formData?.to_location || "");
-    setValue("start_reading", formData?.start_reading || 0);
-    setValue("end_reading", formData?.end_reading || 0);
-    setValue("isRunning", formData?.isRunning || false, {
-      shouldValidate: true,
-    });
-  }, [formData,setformData]);
 
   // On Change handler for select menu
   const onChangeVehiclee = (value: string | null, obj: ComboboxItem) => {
@@ -104,18 +67,23 @@ const TripForm = ({ user }: any) => {
     setValue("to_location", vehicleObj.default_to_location);
     setValue("start_reading", vehicleObj.speedometer_reading);
     setValue("passenger_name", vehicleObj.default_passenger);
+    setValue('vehicle_number',value || '')
   };
 
 
   // On Submit Function
-  const OnSubmitTripForm = async (values: TripsDBType) => {
+  const OnSubmitTripForm = async (values: TripFormObject) => {
     console.log("OnSubmitTripForm Triggered")
     const response = await submitTrip(values)
     console.log("Response recived after updating trip in TripForm:",response)
-    if(response){
-      setformData(response)
+    const verifiedResponse = TripFormSchema.safeParse(response)
+    if(verifiedResponse.success){
+      console.log("Successfully parsed response from server into TripFormSchema")
+      // setformData(response)
+      reset(verifiedResponse.data)
+    }else{
+      console.log(verifiedResponse.error)
     }
-    // reset()
   }
 
   return (
@@ -251,6 +219,12 @@ const TripForm = ({ user }: any) => {
                             size="sm"
                           >{`${errors?.end_reading.message}`}</Text>
                         )}
+                        {errors?.end_reading && (
+                          <Text
+                            c="red"
+                            size="sm"
+                          >{`${errors?.end_reading.message}`}</Text>
+                        )}
                       </Stack>
                     </Group>
 
@@ -262,6 +236,7 @@ const TripForm = ({ user }: any) => {
                         disabled={getValues("isRunning")}
                         color="green"
                         leftSection={<IconCar size={16}/>}
+                        onClick={()=>console.log("Errors:",errors,"Values",getValues())}
                       >
                         Start Trip
                       </Button>
