@@ -8,13 +8,12 @@ export const users = sqliteTable('users', {
   email: text('email').unique(),
   password_hash: text('password_hash'),
   role: text('role'),
-  created_at: text('created_at'),
   session_token: text('session_token')
 });
 
 export const vehicles = sqliteTable('vehicles', {
   id: int('id').primaryKey(),
-  vehicle_number: text('vehicle_number').notNull(),
+  vehicle_number: text('vehicle_number').notNull().unique(),
   speedometer_reading: int('speedometer_reading'),
   default_passenger: text('default_passenger'),
   default_from_location: text('default_from_location'),
@@ -25,7 +24,7 @@ export const vehicles = sqliteTable('vehicles', {
 export const trips = sqliteTable('trips', {
   id: int('id').primaryKey(),
   driver_id: int('driver_id').notNull().references(() => users.id),
-  vehicle_id: int('vehicle_id').notNull().references(() => vehicles.id),
+  vehicle_number: text('vehicle_number').notNull().references(() => vehicles.vehicle_number),
   passenger_name: text('passenger_name').notNull(),
   from_location: text('from_location').notNull(),
   to_location: text('to_location').notNull(),

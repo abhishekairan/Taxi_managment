@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     // }
     const response = await getAllVehicles();
     if (!response) {
-        return new Response("No users found", { status: 404 });
+        return new Response("No vehicle found", { status: 404 });
     }
     return NextResponse.json(response,{status: 200});
     // return new Response(JSON.stringify(response), { status: 200 });

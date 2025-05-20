@@ -11,6 +11,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@mantine/core": "^7.17.5",
     "@mantine/form": "^7.17.5",
     "@mantine/hooks": "^7.17.5",
@@ -30,6 +31,7 @@
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.4",
     "storybook": "^8.6.12",
     "zod": "^3.24.4"
   },

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9c04b6c1-bf03-407b-b7db-bdeff7b03bb9",
+  "id": "26a20001-ce92-4035-b551-40d5908c48c7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "expense": {
@@ -78,14 +78,14 @@
           "name": "driver_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "vehicle_id": {
-          "name": "vehicle_id",
-          "type": "integer",
+        "vehicle_number": {
+          "name": "vehicle_number",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "passenger_name": {
@@ -162,15 +162,15 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "trips_vehicle_id_vehicles_id_fk": {
-          "name": "trips_vehicle_id_vehicles_id_fk",
+        "trips_vehicle_number_vehicles_vehicle_number_fk": {
+          "name": "trips_vehicle_number_vehicles_vehicle_number_fk",
           "tableFrom": "trips",
           "tableTo": "vehicles",
           "columnsFrom": [
-            "vehicle_id"
+            "vehicle_number"
           ],
           "columnsTo": [
-            "id"
+            "vehicle_number"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -218,13 +218,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "session_token": {
           "name": "session_token",
           "type": "text",
@@ -261,7 +254,7 @@
           "name": "vehicle_number",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "speedometer_reading": {

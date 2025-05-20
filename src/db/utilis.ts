@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import db from './index';
 import { users, vehicles, trips, expense } from './schema';
 import { eq,and } from 'drizzle-orm';
+import { TripsDBSchema, TripsDBType, UsersDBSchema, VehcileDBSchema } from '@/lib/type';
 
 // ===== Helper functions =====
 async function getUserById(id: number) {
@@ -11,6 +12,11 @@ async function getUserById(id: number) {
 
 async function getVehicleById(id: number) {
   const result = await db.select().from(vehicles).where(eq(vehicles.id, id));
+  return result[0] ?? null;
+}
+
+async function getVehicleByNumber(number: string) {
+  const result = await db.select().from(vehicles).where(eq(vehicles.vehicle_number, number));
   return result[0] ?? null;
 }
 
@@ -120,9 +126,7 @@ export async function getActiveTripByDriverId(driverId: number) {
   const result =await db.select().from(trips).where(and(eq(trips.driver_id, Number(driverId)),eq(trips.isRunning,true))).get();
   if (!result) return null;
   return {
-    ...result,
-    driver_id: await getDriver(result.driver_id),
-    vehicle_id: await getVehicleById(result.vehicle_id)
+    ...result
   };
 }
 
@@ -134,9 +138,7 @@ export async function getActiveTrips(){
 export async function getAllTrips() {
   const rows = await db.select().from(trips);
   return await Promise.all(rows.map(async (t) => ({
-    ...t,
-    driver_id: await getDriver(t.driver_id),
-    vehicle_id: await getVehicleById(t.vehicle_id)
+    ...t
   })));
 }
 
@@ -147,8 +149,6 @@ export async function getTrip(id: number) {
 
   return {
     ...trip,
-    driver_id: await getDriver(trip.driver_id),
-    vehicle_id: await getVehicleById(trip.vehicle_id)
   };
 }
 
@@ -182,31 +182,16 @@ export async function createTrip(data: any) {
   return NextResponse.json(response, { status: 200 });
 }
 
-export async function updateTrip(id: number, updates: any) {
-  if ('driver_id' in updates) {
-    if (typeof updates.driver_id === 'object') {
-      const driver = await getUserById(updates.driver_id.id);
-      if (!driver) throw new Error('Invalid driver object');
-      updates.driver_id = driver.id;
-    } else {
-      const driver = await getUserById(updates.driver_id);
-      if (!driver) throw new Error('Invalid driver ID');
-    }
+export async function updateTrip(id: number, data: TripsDBType) {
+  const updates = TripsDBSchema.safeParse(data)
+  if(updates.success){
+    // console.log(updates.data)
+    await db.update(trips).set(updates.data).where(eq(trips.id, id));
+    const updatedData = await getTrip(updates.data.id) 
+    return NextResponse.json(updatedData, { status: 200 });
+  }else{
+    return null
   }
-
-  if ('vehicle_id' in updates) {
-    if (typeof updates.vehicle_id === 'object') {
-      const vehicle = await getVehicleById(updates.vehicle_id.id);
-      if (!vehicle) throw new Error('Invalid vehicle object');
-      updates.vehicle_id = vehicle.id;
-    } else {
-      const vehicle = await getVehicleById(updates.vehicle_id);
-      if (!vehicle) throw new Error('Invalid vehicle ID');
-    }
-  }
-  await db.update(vehicles).set({speedometer_reading:updates.end_reading}).where(eq(vehicles.id,Number(updates.vehicle_id)))
-  const response = await db.update(trips).set(updates).where(eq(trips.id, id));
-  return NextResponse.json(response, { status: 200 });
 }
 
 export async function deleteTrip(id: number) {

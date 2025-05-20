@@ -1,8 +1,7 @@
-'use client';
+"use client";
 
 import {
   Badge,
-  Box,
   Button,
   ComboboxItem,
   Container,
@@ -14,169 +13,278 @@ import {
   Select,
   Stack,
   Text,
-  TextInput
-} from '@mantine/core';
-import { IconBusStop, IconCar } from '@tabler/icons-react';
-import { useForm } from '@mantine/form';
-import Surface from '@/components/Surface/Surface';
-import { JWTPayload } from 'jose';
-import { vehicles } from '@/db/schema';
-import submitTrip, { formProps } from '@/app/actions/submitTrip';
-import { useRouter } from 'next/navigation';
+  TextInput,
+} from "@mantine/core";
+import { IconBusStop, IconCar } from "@tabler/icons-react";
+import Surface from "@/components/Surface/Surface";
+import { useForm } from "react-hook-form";
+import { TripsDBSchema, TripsDBType, VehicleDBType } from "@/lib/type";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import submitTrip from "@/app/actions/submitTrip";
 
 const PAPER_PROPS: PaperProps = {
-  p: 'md',
-  shadow: 'md',
-  radius: 'md',
-  style: { height: '100%' },
+  p: "md",
+  shadow: "md",
+  radius: "md",
+  style: { height: "100%" },
 };
 
-interface formDataProps{
-  data?:{
-    id?: number;
-    driver_id?: {
-      id: number;
-      name: string;
-      email: string;
-    }
-    vehicle_id?: {
-      id: number;
-      vehicle_number: string;
-      speedometer_reading:  number;
-      default_passenger: string;
-      default_from_location: string;
-      default_to_location: string
-    };
-    passenger_name?: string;
-    from_location?: string;
-    to_location?: string;
-    start_reading?: number;
-    end_reading?: number;
-    start_time?: string;
-    end_time?: string;
-    isRunning?: boolean
-  }
-  user?: any
-  vehicles: typeof vehicles.$inferSelect[]
+
+// Getting vehicles
+const vehiclesResponse = await (
+  await fetch(new URL("/api/vehicle", "http://localhost:3000"))
+).json();
+let vehicles: { value: string; label: string }[] | null = null; // variable to store all vehicle id and vehicle number
+if (vehiclesResponse) {
+  vehicles = vehiclesResponse.map((v: VehicleDBType) => {
+    return { value: v.vehicle_number, label: v.vehicle_number };
+  });
 }
 
-const TripForm = (formData: formDataProps) => {
+const TripForm = ({ user }: any) => {
+  // Getting Active Trip
+  const [formData, setformData] = useState<TripsDBType>();
 
-  console.log('Client reloaded')
-
-  const router = useRouter()
-
-  const formdata = useForm({
-    initialValues: {
-      'id': formData.data?.id,
-      'driver_id':formData.user?.userId,
-      'vehicle_id': String(formData.data?.vehicle_id?.id),
-      'passenger_name': formData.data?.passenger_name || formData.data?.vehicle_id?.default_passenger || '',
-      'from_location': formData.data?.from_location || formData.data?.vehicle_id?.default_from_location,
-      'to_location': formData.data?.to_location || formData.data?.vehicle_id?.default_to_location,
-      'start_reading': formData.data?.start_reading,
-      'end_reading': formData.data?.end_reading,
-      'isRunning': formData.data?.isRunning || false
-    },
-    mode:'uncontrolled',
-    validate:{
-      end_reading: (value:number|undefined,values)=>{
-        if(values.isRunning){
-          if(!value){
-            return "End reading is required"
-          }else if(values.start_reading && value<values.start_reading){
-            return "Invalid reading"
-          }
-        }
-      }
-    }
+  // react-hook-form
+  const {
+    formState: { errors, isSubmitting },
+    register,
+    getValues,
+    setValue,
+    handleSubmit,
+    reset
+  } = useForm<TripsDBType>({
+    resolver: zodResolver(TripsDBSchema),
+    defaultValues: formData
   });
+
+  useEffect(() => {
+    const data = async () => {
+      const response = await fetch(
+        new URL(
+          `/api/trip/activetrip/${user?.userId}`,
+          "http://localhost:3000"
+        )
+      );
+      const data = await response.json();
+      console.log("trip:", data);
+      const verifiedData = TripsDBSchema.safeParse(data);
+      if (verifiedData.success) {
+        // console.log("verified Data: ",verifiedData)
+        setformData(data);
+      }
+      // else{
+      //   console.log("Error in data: ",verifiedData.error)
+      // }
+    };
+    data();
+  }, []);
+
+  useEffect(() => {
+    setValue("id", formData?.id || 0);
+    setValue("driver_id", formData?.driver_id || user.useId);
+    setValue("vehicle_number", formData?.vehicle_number || "");
+    setValue("passenger_name", formData?.passenger_name || "");
+    setValue("from_location", formData?.from_location || "");
+    setValue("to_location", formData?.to_location || "");
+    setValue("start_reading", formData?.start_reading || 0);
+    setValue("end_reading", formData?.end_reading || 0);
+    setValue("isRunning", formData?.isRunning || false, {
+      shouldValidate: true,
+    });
+  }, [formData,setformData]);
+
+  // On Change handler for select menu
   const onChangeVehiclee = (value: string | null, obj: ComboboxItem) => {
-    const vehicleObj = formData.vehicles.find((e)=>{return e.id===Number(value)})
-    formdata.setValues({'from_location': vehicleObj?.default_from_location || undefined,'to_location': vehicleObj?.default_to_location || undefined,'vehicle_id': value || '',passenger_name: vehicleObj?.default_passenger || undefined,'start_reading': vehicleObj?.speedometer_reading || undefined})
+    const vehicleObj = vehiclesResponse.find((e: VehicleDBType) => {
+      return e.vehicle_number === value;
+    });
+    setValue("from_location", vehicleObj.default_from_location);
+    setValue("to_location", vehicleObj.default_to_location);
+    setValue("start_reading", vehicleObj.speedometer_reading);
+    setValue("passenger_name", vehicleObj.default_passenger);
+  };
+
+
+  // On Submit Function
+  const OnSubmitTripForm = async (values: TripsDBType) => {
+    console.log("OnSubmitTripForm Triggered")
+    const response = await submitTrip(values)
+    console.log("Response recived after updating trip in TripForm:",response)
+    if(response){
+      setformData(response)
+    }
+    // reset()
   }
 
-  // console.log("formdata:",formdata)
-  // formdata.setFieldValue('isRunning', false);
   return (
     <>
-      <form onSubmit={formdata.onSubmit(submitTrip)}>
-      <Container fluid>
-        <Stack gap="lg">
-          <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
-            
-            <Grid.Col span={{ base: 12, md: 4 }}>
-              <Surface component={Paper} {...PAPER_PROPS}>
-                <Stack>
-                  <Group>
-                    <Text size="lg" fw={600}>
-                      Trip information
-                    </Text>
-                    {formData.data?.isRunning? <Badge color="green" radius="sm">Active</Badge>:<Badge color="gray" radius="sm">Inactive</Badge>}
-                    
-                  </Group>
-                  <Select 
-                    label="Select vehicle"
-                    placeholder="Select vehicle"
-                    data={formData.vehicles.map((vehicle) => ({value: String(vehicle.id), label: vehicle.vehicle_number}))}
-                    key={formdata.key('vehicle_id')}
-                    {...formdata.getInputProps('vehicle_id')}
-                    onChange={onChangeVehiclee}
-                  />
-                  <TextInput
-                    label="Passenger name"
-                    placeholder={formdata.values.passenger_name || "Passenger name"}
-                    disabled={formdata.values.isRunning}
-                    key={formdata.key('passenger_name')}
-                    {...formdata.getInputProps('passenger_name')}
-                  />
-                  <TextInput
-                    label="From Location"
-                    placeholder={formdata.values.from_location || "From location"}
-                    key={formdata.key('from_location')}
-                    {...formdata.getInputProps('from_location')}
-                  />
-                  <TextInput
-                    label="To Location"
-                    placeholder="To location"
-                    key={formdata.key('to_location')}
-                    {...formdata.getInputProps('to_location')}
+      <form onSubmit={handleSubmit(OnSubmitTripForm)}>
+        <Container fluid>
+          <Stack gap="lg">
+            <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
+              <Grid.Col span={{ base: 12, md: 4 }}>
+                <Surface component={Paper} {...PAPER_PROPS}>
+                  <Stack>
+                    <Group>
+                      <Text size="lg" fw={600}>
+                        Trip information
+                      </Text>
+                      {formData?.isRunning ? (
+                        <Badge color="green" radius="sm">
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge color="gray" radius="sm">
+                          Inactive
+                        </Badge>
+                      )}
+                    </Group>
 
-                  />
-                  <Group grow>
-                    <NumberInput
-                      disabled={formdata.values.isRunning}
-                      label="Start Reading"
-                      placeholder="Start reading"
-                      key={formdata.key('start_reading')}
-                      {...formdata.getInputProps('start_reading')}
+                    {/* Vehicle Select Menu */}
+                    <Select
+                      {...register("vehicle_number")}
+                      defaultValue={formData?.vehicle_number}
+                      label="Select vehicle"
+                      placeholder="Select vehicle"
+                      data={vehicles || undefined}
+                      disabled={getValues("isRunning")}
+                      onChange={onChangeVehiclee}
                     />
-                    <NumberInput 
-                      disabled={!formdata.values.isRunning}
-                      label="End Reading"
-                      placeholder="End reading"
-                      key={formdata.key('end_reading')}
-                      {...formdata.getInputProps('end_reading')}
-                    />
-                  </Group>
-                  <Group grow justify='center'>
-                    <Button type='submit' disabled={formdata.values.isRunning} color='green' leftSection={<IconCar size={16}/>}>
-                      Start Trip
-                    </Button>
-                    <Button type='submit' disabled={!formdata.values.isRunning} color='red' leftSection={<IconBusStop size={16}/>}>
-                      End Trip
-                    </Button>
-                  </Group>
-                </Stack>
-              </Surface>
-            </Grid.Col>
+                    {errors?.vehicle_number && (
+                      <Text
+                        c="red"
+                        size="sm"
+                      >{`${errors.vehicle_number.message}`}</Text>
+                    )}
 
-          </Grid>
-        </Stack>
-      </Container>
+                    {/* Passenger Field */}
+                    <TextInput
+                      {...register("passenger_name", {
+                        required: "Passenger name is required",
+                      })}
+                      label="Passenger name"
+                      placeholder="Passenger name"
+                      disabled={getValues("isRunning")}
+                    />
+                    {errors?.passenger_name && (
+                      <Text
+                        c="red"
+                        size="sm"
+                      >{`${errors.passenger_name.message}`}</Text>
+                    )}
+
+                    {/* From Location Field */}
+                    <TextInput
+                      {...register("from_location", {
+                        required: "From Location is required",
+                      })}
+                      label="From Location"
+                      placeholder="From location"
+                    />
+                    {errors?.from_location && (
+                      <Text
+                        c="red"
+                        size="sm"
+                      >{`${errors.from_location.message}`}</Text>
+                    )}
+
+                    {/* To Location Field */}
+                    <TextInput
+                      {...register("to_location", {
+                        required: "To Location is required",
+                      })}
+                      label="To Location"
+                      placeholder="To location"
+                    />
+                    {errors?.to_location && (
+                      <Text
+                        c="red"
+                        size="sm"
+                      >{`${errors.to_location.message}`}</Text>
+                    )}
+
+                    {/* Reading Field */}
+                    <Group grow>
+                      <Stack>
+                        {/* Start Reading Field */}
+                        <TextInput
+                          {...register("start_reading", {
+                            pattern: new RegExp("^[0-9]+$"),
+                            required: "Start reading is required",
+                          })}
+                          disabled={getValues("isRunning")}
+                          label="Start Reading"
+                          placeholder="Start reading"
+                        />
+                        {errors?.start_reading?.type === "pattern" && (
+                          <Text c="red" size="sm">
+                            Only Numbers Allowed
+                          </Text>
+                        )}
+                        {errors?.start_reading?.type === "required" && (
+                          <Text
+                            c="red"
+                            size="sm"
+                          >{`${errors?.start_reading.message}`}</Text>
+                        )}
+                      </Stack>
+                      <Stack>
+                        {/* Ending Reading Field */}
+                        <TextInput
+                          {...register("end_reading", {
+                            pattern: new RegExp("^[d]+$ | ^[0-9]+$"),
+                            disabled: !getValues("isRunning"),
+                          })}
+                          label="End Reading"
+                          placeholder="End reading"
+                        />
+                        {errors?.end_reading?.type === "pattern" && (
+                          <Text c="red" size="sm">
+                            Only Numbers Allowed
+                          </Text>
+                        )}
+                        {errors?.end_reading?.type === "required" && (
+                          <Text
+                            c="red"
+                            size="sm"
+                          >{`${errors?.end_reading.message}`}</Text>
+                        )}
+                      </Stack>
+                    </Group>
+
+                    {/* Buttons */}
+                    <Group grow justify="center">
+                      {/* Start Trip */}
+                      <Button
+                        type="submit"
+                        disabled={getValues("isRunning")}
+                        color="green"
+                        leftSection={<IconCar size={16}/>}
+                      >
+                        Start Trip
+                      </Button>
+
+                      {/* End Trip */}
+                      <Button
+                        type="submit"
+                        disabled={!getValues("isRunning")}
+                        color="red"
+                        leftSection={<IconBusStop size={16}/>}
+                      >
+                        End Trip
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Surface>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        </Container>
       </form>
     </>
   );
-}
+};
 
-export default TripForm
+export default TripForm;

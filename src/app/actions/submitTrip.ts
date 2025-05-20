@@ -1,31 +1,27 @@
 "use server"
 
 import { createTrip, updateTrip } from "@/db/utilis";
-import { redirect } from "next/navigation";
+import { TripsDBSchema, TripsDBType } from "@/lib/type";
 
-export interface formProps {
-    id: number | undefined;
-    driver_id: string | undefined;
-    vehicle_id: string | undefined;
-    passenger_name: string | undefined;
-    from_location: string | undefined;
-    to_location: string | undefined;
-    start_reading: number | undefined;
-    end_reading: number | undefined;
-    isRunning: boolean
-}
-
-export default async function (value: formProps){
-    return new Promise(async (res,rej)=>{
-        console.log(value)
-        if(value.isRunning){
-            if(!value.id) return
-            value.isRunning = false
-            await updateTrip(value.id,value)
-            res(true)
-        }else{
-            // console.log(value)
-            createTrip(value)
+export default async function (value: TripsDBType){
+    const newValues = TripsDBSchema.safeParse(value)
+    console.log("submittrip values:",newValues)
+    if(newValues.data?.isRunning){
+        if(!value.id || value.id<1) return
+        newValues.data.isRunning = false
+        newValues.data.end_time = new Date().toISOString()
+        const response = await updateTrip(newValues.data.id,newValues.data)
+        const newData = TripsDBSchema.safeParse(await response?.json())
+        if(newData.success){
+            // console.log("Sending data back from submitTrip: ",newData.data)
+            return newData.data
         }
-    })
+    }else{
+        console.log(value)
+        const data = TripsDBSchema.safeParse(value)
+        if(data.success){
+            data.data.start_time = new Date().toISOString()
+            // createTrip(data.data)
+        }
+    }
 }

@@ -9,8 +9,8 @@ CREATE TABLE `expense` (
 --> statement-breakpoint
 CREATE TABLE `trips` (
 	`id` integer PRIMARY KEY NOT NULL,
-	`driver_id` integer,
-	`vehicle_id` integer,
+	`driver_id` integer NOT NULL,
+	`vehicle_number` text NOT NULL,
 	`passenger_name` text NOT NULL,
 	`from_location` text NOT NULL,
 	`to_location` text NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE `trips` (
 	`end_time` text,
 	`running` integer DEFAULT true,
 	FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`vehicle_number`) REFERENCES `vehicles`(`vehicle_number`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -29,14 +29,13 @@ CREATE TABLE `users` (
 	`email` text,
 	`password_hash` text,
 	`role` text,
-	`created_at` text,
 	`session_token` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `vehicles` (
 	`id` integer PRIMARY KEY NOT NULL,
-	`vehicle_number` text,
+	`vehicle_number` text NOT NULL,
 	`speedometer_reading` integer,
 	`default_passenger` text,
 	`default_from_location` text,

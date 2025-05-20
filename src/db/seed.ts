@@ -49,7 +49,7 @@ async function seed() {
     {
       id: 1,
       driver_id: 1,
-      vehicle_id: 1,
+      vehicle_number: "KA01MX1234",
       passenger_name: 'Alice Smith',
       from_location: 'Airport',
       to_location: 'Hotel Zone',
@@ -62,7 +62,7 @@ async function seed() {
     {
       id: 2,
       driver_id: 1,
-      vehicle_id: 1,
+      vehicle_number: "KA01MX1234",
       passenger_name: 'Bob Johnson',
       from_location: 'Hotel Zone',
       to_location: 'Shopping Mall',
