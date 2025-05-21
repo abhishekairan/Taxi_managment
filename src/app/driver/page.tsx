@@ -1,10 +1,6 @@
 import { useUser } from '@/hooks/useUser'
 import TripForm from '@/components/driver/TripForm';
-import { TripFormObject, TripFormSchema } from '@/lib/type';
-
-export async function submitTrip(prevstate:any,formdata: FormData){
-  return prevstate
-}
+import { getActiveTripByDriverId } from '@/db/utilis';
 
 async function Page() {
   const user = await useUser();
@@ -17,15 +13,16 @@ async function Page() {
   //   iat: 1747631676,
   //   exp: 1748236476
   // }
-  const response = await fetch(new URL(`/api/trip/activetrip/${user?.userId}`, 'http://localhost:3000'), {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  const data = await response.json()
-  console.log(data)
-  if(!data){
+  // const response = await fetch(new URL(`/api/trip/activetrip/${user?.userId}`, 'http://localhost:3000'), {
+  //   method: 'GET',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   }
+  // })
+  if(user){
+    const data = await getActiveTripByDriverId(Number(user.userId))
+    // console.log(data)
+    if(!data){
     const newdata = {
       driver_id: user?.userId || 0,
       vehicle_number: '', 
@@ -38,15 +35,15 @@ async function Page() {
       end_time: '',
       isRunning: false
     }
-    console.log("No Active Trip found")
+    // console.log("No Active Trip found")
     return (
       <TripForm formData={newdata}></TripForm>
-    )
-  }
-  console.log("active trip found")
+    )}
+  // console.log("active trip found")
   return (
     <TripForm formData={data}></TripForm>
   )
+}
 }
 
 export default Page;

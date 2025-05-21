@@ -73,12 +73,12 @@ const TripForm = ({ formData }: any) => {
 
   // On Submit Function
   const OnSubmitTripForm = async (values: TripFormObject) => {
-    console.log("OnSubmitTripForm Triggered")
+    // console.log("OnSubmitTripForm Triggered")
     const response = await submitTrip(values)
-    console.log("Response recived after updating trip in TripForm:",response)
+    // console.log("Response recived after updating trip in TripForm:",response)
     const verifiedResponse = TripFormSchema.safeParse(response)
     if(verifiedResponse.success){
-      console.log("Successfully parsed response from server into TripFormSchema")
+      // console.log("Successfully parsed response from server into TripFormSchema")
       // setformData(response)
       reset(verifiedResponse.data)
     }else{
@@ -236,7 +236,6 @@ const TripForm = ({ formData }: any) => {
                         disabled={getValues("isRunning")}
                         color="green"
                         leftSection={<IconCar size={16}/>}
-                        onClick={()=>console.log("Errors:",errors,"Values",getValues())}
                       >
                         Start Trip
                       </Button>

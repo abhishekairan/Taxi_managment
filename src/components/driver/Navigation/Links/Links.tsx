@@ -51,7 +51,6 @@ export function LinksGroup(props: LinksGroupProps) {
         component="button"
         className={classes.link}
         onClick={() => {
-          console.log("On Clicked triggered for ",link.label)
           router.push(link.link);
           closeSidebar();
         }}

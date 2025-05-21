@@ -1,5 +1,20 @@
 import { z } from 'zod'
 
+// ----- Schema & Types Hooks ----- 
+
+// useUser Schema
+export const useUserSchema = z.object({
+  userId: z.coerce.string(),
+  email: z.coerce.string(),
+  role: z.coerce.string(),
+  name: z.coerce.string(),
+  expiresAt: z.coerce.string(),
+  iat: z.coerce.number(),
+  exp: z.coerce.number()
+})
+// useUser Type
+export type useUserType = z.infer<typeof useUserSchema>
+
 
 // ----- Schema & Types for database tables ----- 
 
