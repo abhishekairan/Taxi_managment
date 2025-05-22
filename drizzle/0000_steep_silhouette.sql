@@ -1,9 +1,11 @@
 CREATE TABLE `expense` (
 	`id` integer PRIMARY KEY NOT NULL,
+	`driver_id` integer,
 	`trip_id` integer,
 	`amount` integer,
 	`description` text,
 	`created_at` text DEFAULT (current_timestamp),
+	FOREIGN KEY (`driver_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`trip_id`) REFERENCES `trips`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -41,3 +43,5 @@ CREATE TABLE `vehicles` (
 	`default_from_location` text,
 	`default_to_location` text
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `vehicles_vehicle_number_unique` ON `vehicles` (`vehicle_number`);

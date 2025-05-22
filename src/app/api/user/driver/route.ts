@@ -1,14 +1,13 @@
 import { createUser, getAllDrivers } from "@/db/utilis";
 import { create } from "domain";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
     const response = await getAllDrivers();
     if (!response) {
-    if(!response) {
-        return new Response("User not found", { status: 404 });
-    }
-    return new Response(response, { status: 200 });
+        return NextResponse.json("User not found", { status: 404 });
+    }else{
+    return NextResponse.json(response, { status: 200 });
     }
 }
 

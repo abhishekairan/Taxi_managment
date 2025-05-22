@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
 import { useCallback, useEffect, useState } from 'react';
 
-const useFetchData = (url: string) => {
+const useFetchData = (url: URL) => {
   const [data, setData] = useState<any>([]);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -11,9 +11,10 @@ const useFetchData = (url: string) => {
     try {
       const response = await fetch(url);
       const json = await response.json();
-
-      setData(json);
+      setData(json.data);
+      console.log(`Response recived for ${url}`,json)
     } catch (error) {
+      console.log(`error recived for ${url}`,error)
       setError(error);
     } finally {
       setLoading(false);
@@ -23,7 +24,7 @@ const useFetchData = (url: string) => {
   useEffect(() => {
     fetchData();
   }, [url]);
-
+  console.log("Returning data from useFetchData:",{ data, error, loading })
   return { data, error, loading };
 };
 

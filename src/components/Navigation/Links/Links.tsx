@@ -52,7 +52,7 @@ export function LinksGroup(props: LinksGroupProps) {
         className={classes.link}
         onClick={() => {
           console.log("On Clicked triggered for ",link.label)
-          router.push(link.link);
+          router.replace(link.link);
           closeSidebar();
         }}
         data-active={link.link.toLowerCase() === pathname || undefined}

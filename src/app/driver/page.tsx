@@ -29,8 +29,6 @@ async function Page() {
       passenger_name: '',
       from_location: '',
       to_location: '',
-      start_reading: 0,
-      end_reading: 0,
       start_time: '',
       end_time: '',
       isRunning: false

@@ -37,6 +37,7 @@ export const trips = sqliteTable('trips', {
 
 export const expense = sqliteTable('expense', {
   id: int('id').primaryKey(),
+  driver_id: int('driver_id').references(()=>users.name),
   trip_id: int('trip_id').references(() => trips.id),
   amount: int('amount'),
   description: text('description'),

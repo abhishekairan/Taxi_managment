@@ -26,20 +26,15 @@ const mockdata = [
   {
     title: 'Home',
     links: [
-      { label: 'Trip', icon: IconCar, link: '../driver' },
-      {
-        label: 'Expense',
-        icon: IconCurrencyRupee,
-        link: 'driver/expenses',
-      }
+      { label: 'Trip', icon: IconCar, link: '/driver' },
     ],
   },
   {
     title: 'Dashboard',
     links: [
-      { label: 'Trips', icon: IconMessages, link: PATH_APPS.chat },
-      { label: 'Expenses', icon: IconBriefcase, link: PATH_APPS.projects },
-      { label: 'Profile', icon: IconUserCode, link: PATH_APPS.settings },
+      { label: 'Trips', icon: IconCar, link: '/driver/trips' },
+      { label: 'Expenses', icon: IconCurrencyRupee, link: '/driver/expenses' },
+      { label: 'Profile', icon: IconUserCode, link: '/driver/profile' },
     ],
   },
 ];

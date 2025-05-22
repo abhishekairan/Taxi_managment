@@ -2,22 +2,22 @@ import { NextResponse } from 'next/server';
 import db from './index';
 import { users, vehicles, trips, expense } from './schema';
 import { eq,and } from 'drizzle-orm';
-import { TripsDBSchema, TripsDBType, UsersDBSchema, VehcileDBSchema } from '@/lib/type';
+import { ExpenseDBSchema, ExpenseDBType, TripsDBSchema, TripsDBType, UsersDBSchema, VehcileDBSchema, VehicleDBType } from '@/lib/type';
 
 // ===== Helper functions =====
-async function getUserById(id: number) {
+export async function getUserById(id: number) {
   const result = await db.select().from(users).where(eq(users.id, id));
   return result[0] ?? null;
 }
 
-async function getVehicleById(id: number) {
+export async function getVehicleById(id: number) {
   const result = await db.select().from(vehicles).where(eq(vehicles.id, id));
   return result[0] ?? null;
 }
 
-async function getVehicleByNumber(number: string) {
+export async function getVehicleByNumber(number: string) {
   const result = await db.select().from(vehicles).where(eq(vehicles.vehicle_number, number));
-  return result[0] ?? null;
+  return result[0];
 }
 
 // ===== Users =====
@@ -102,20 +102,14 @@ export async function createVehicle(data: any) {
   await db.insert(vehicles).values({ ...data });
 }
 
-export async function updateVehicle(id: number, updates: any) {
-  if ('assigned_driver_id' in updates) {
-    if (typeof updates.assigned_driver_id === 'object') {
-      const user = await getUserById(updates.assigned_driver_id.id);
-      if (!user) return null;
-      updates.assigned_driver_id = user.id;
-    } else {
-      const user = await getUserById(updates.assigned_driver_id);
-      if (!user) return null;
-    }
+export async function updateVehicle(vehicle: VehicleDBType) {
+  const response = await db.update(vehicles).set(vehicle).where(eq(vehicles.id, vehicle.id));
+  const updatedVehicle = await getVehicleById(vehicle.id) 
+  if(response.changes>0){
+    console.log("Vehicle Updating and sending response",updatedVehicle)
+    return NextResponse.json({data:updatedVehicle},{status:200})
   }
-  const response = await db.update(vehicles).set(updates).where(eq(vehicles.id, id));
-  if (!response || response.changes==0) return null
-  return NextResponse.json(response,{status:200})
+  return NextResponse.json(response,{status:400})
 }
 
 
@@ -188,10 +182,20 @@ export async function getAllExpenses() {
 
 export async function getExpense(id: number) {
   const result = await db.select().from(expense).where(eq(expense.id, id));
-  const expenseData = result[0];
-  if (!expenseData) return null;
+  if (result.length>0){
+    return NextResponse.json({data: result},{status:200})
+  }else{
+    return NextResponse.json({data: result},{status:400})
+  }
+}
 
-  return expenseData;
+export async function getExpenseByDriverId(id: number) {
+  const result = await db.select().from(expense).where(eq(expense.driver_id, id));
+  if(result.length>0){
+    return NextResponse.json({data: result},{status:200})
+  }else{
+    return NextResponse.json({error: result},{status:404})
+  }
 }
 
 export async function getExpensesByTripId(tripId: number) {
@@ -203,33 +207,26 @@ export async function getExpensesByTripId(tripId: number) {
   };
 }
 
-export async function createExpense(data: any) {
-  let tripId: number;
-
-  if (typeof data.trip_id === 'object') {
-    const trip = await getTrip(data.trip_id.id);
-    if (!trip) throw new Error('Invalid trip object');
-    tripId = trip.id;
-  } else {
-    const trip = await getTrip(data.trip_id);
-    if (!trip) throw new Error('Invalid trip ID');
-    tripId = trip.id;
+export async function createExpense(data: ExpenseDBType) {
+  const response = await db.insert(expense).values(data);
+  if(response.lastInsertRowid>0){
+    const newField = await getExpense(Number(response.lastInsertRowid))
+    return NextResponse.json({data: newField},{status:200})
+  }else{
+    return NextResponse.json({error:response},{status:400})
   }
-
-  await db.insert(expense).values({ ...data, trip_id: tripId });
 }
 
-export async function updateExpense(id: number, updates: any) {
-  if ('trip_id' in updates) {
-    if (typeof updates.trip_id === 'object') {
-      const trip = await getTrip(updates.trip_id.id);
-      if (!trip) throw new Error('Invalid trip object');
-      updates.trip_id = trip.id;
-    } else {
-      const trip = await getTrip(updates.trip_id);
-      if (!trip) throw new Error('Invalid trip ID');
+export async function updateExpense(updates: ExpenseDBType) {
+  const response = await db.update(expense).set(updates).where(eq(expense.id, updates.id));
+  console.log(response)
+  if(response.changes>0){
+    const newExpenseResponse = await(await getExpense(updates.id)).json()
+    if(newExpenseResponse.ok){
+      const newExpense = ExpenseDBSchema.safeParse(newExpenseResponse.data)
+      return NextResponse.json({data: newExpense.data},{status:200})
     }
+  }else{
+    return NextResponse.json({data: response},{status:400})
   }
-
-  await db.update(expense).set(updates).where(eq(expense.id, id));
 }

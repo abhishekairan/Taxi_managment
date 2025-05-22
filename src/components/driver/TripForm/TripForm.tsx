@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { TripFormObject, TripFormSchema, VehicleDBType } from "@/lib/type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import submitTrip from "@/app/actions/submitTrip";
+import { useEffect } from "react";
 
 const PAPER_PROPS: PaperProps = {
   p: "md",
@@ -57,6 +58,7 @@ const TripForm = ({ formData }: any) => {
     resolver: zodResolver(TripFormSchema),
     defaultValues: formData
   });
+
 
   // On Change handler for select menu
   const onChangeVehiclee = (value: string | null, obj: ComboboxItem) => {
@@ -197,6 +199,12 @@ const TripForm = ({ formData }: any) => {
                             size="sm"
                           >{`${errors?.start_reading.message}`}</Text>
                         )}
+                        {errors?.start_reading && (
+                          <Text
+                            c="red"
+                            size="sm"
+                          >{`${errors?.start_reading.message}`}</Text>
+                        )}
                       </Stack>
                       <Stack>
                         {/* Ending Reading Field */}
@@ -236,6 +244,7 @@ const TripForm = ({ formData }: any) => {
                         disabled={getValues("isRunning")}
                         color="green"
                         leftSection={<IconCar size={16}/>}
+                        onClick={(value)=>{console.log(errors)}}
                       >
                         Start Trip
                       </Button>

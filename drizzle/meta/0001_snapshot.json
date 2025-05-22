@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f7824cfb-51fb-4883-b8f2-5dabbab0a547",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "e9ef3411-b014-41af-b762-7cebee80a1e3",
+  "prevId": "f7824cfb-51fb-4883-b8f2-5dabbab0a547",
   "tables": {
     "expense": {
       "name": "expense",
@@ -53,15 +53,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "expense_driver_id_users_id_fk": {
-          "name": "expense_driver_id_users_id_fk",
+        "expense_driver_id_users_name_fk": {
+          "name": "expense_driver_id_users_name_fk",
           "tableFrom": "expense",
           "tableTo": "users",
           "columnsFrom": [
             "driver_id"
           ],
           "columnsTo": [
-            "id"
+            "name"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
