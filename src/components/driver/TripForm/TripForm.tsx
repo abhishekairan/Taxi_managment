@@ -22,6 +22,7 @@ import { TripFormObject, TripFormSchema, VehicleDBType } from "@/lib/type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import submitTrip from "@/app/actions/submitTrip";
 import { useEffect } from "react";
+import { getAllVehicles } from "@/db/utilis";
 
 const PAPER_PROPS: PaperProps = {
   p: "md",
@@ -65,11 +66,13 @@ const TripForm = ({ formData }: any) => {
     const vehicleObj = vehiclesResponse.find((e: VehicleDBType) => {
       return e.vehicle_number === value;
     });
-    setValue("from_location", vehicleObj.default_from_location);
-    setValue("to_location", vehicleObj.default_to_location);
-    setValue("start_reading", vehicleObj.speedometer_reading);
-    setValue("passenger_name", vehicleObj.default_passenger);
-    setValue('vehicle_number',value || '')
+    if(vehicleObj){ 
+      setValue("from_location", vehicleObj.default_from_location || '');
+      setValue("to_location", vehicleObj.default_to_location || '') ;
+      setValue("start_reading", vehicleObj.speedometer_reading || 0);
+      setValue("passenger_name", vehicleObj.default_passenger || '');
+      setValue('vehicle_number',value || '')
+    }
   };
 
 
@@ -82,7 +85,8 @@ const TripForm = ({ formData }: any) => {
     if(verifiedResponse.success){
       // console.log("Successfully parsed response from server into TripFormSchema")
       // setformData(response)
-      reset(verifiedResponse.data)
+      reset()
+      setValue('isRunning',false,{shouldValidate:true})
     }else{
       console.log(verifiedResponse.error)
     }

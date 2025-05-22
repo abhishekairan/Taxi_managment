@@ -39,10 +39,10 @@ export type DriverUserType = z.infer<typeof DriverUserSchema>
 export const VehcileDBSchema = z.object({
   id: z.number(),
   vehicle_number: z.string(),
-  speedometer_reading: z.number(),
-  default_passenger: z.string().optional(),
-  default_from_location: z.string().optional(),
-  default_to_location: z.string().optional(),
+  speedometer_reading: z.number().nullable(),
+  default_passenger: z.string().optional().nullable(),
+  default_from_location: z.string().optional().nullable(),
+  default_to_location: z.string().optional().nullable(),
 });
 // Vehicle Type
 export type VehicleDBType = z.infer<typeof VehcileDBSchema>
@@ -97,6 +97,14 @@ export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
 },{
   message: "Start Reading is required",
   path: ['start_reading']
+}).refine((value)=>{
+  if(value.start_reading && !value.end_reading){
+    return false
+  }
+  return true
+},{
+  message: "End Reading is required",
+  path: ['end_reading']
 })
 // Trip Form Object
 export type TripFormObject = z.infer<typeof TripFormSchema>

@@ -4,43 +4,29 @@ import { createTrip, getVehicle, getVehicleByNumber, updateTrip, updateVehicle }
 import { TripFormObject, TripFormSchema, TripsDBSchema, TripsDBType, VehcileDBSchema } from "@/lib/type";
 
 export default async function (value: TripFormObject){
-    const newValues = TripsDBSchema.safeParse(value)
     // console.log("submittrip values:",newValues)
-    if(newValues.data?.isRunning && newValues.data.id && newValues.data.id > 0){
-        newValues.data.isRunning = false;
-        newValues.data.end_time = new Date().toISOString();
-        const vehicle = VehcileDBSchema.safeParse(await getVehicleByNumber(newValues.data.vehicle_number));
+    if(value.id && value.id > 0){
+        value.isRunning = false;
+        value.end_time = new Date().toISOString();
+        const vehicle = await getVehicleByNumber(value.vehicle_number);
         // console.log("Vehicle Got before updating: ",vehicle)
-        if(vehicle.success && vehicle.data.speedometer_reading){
-            vehicle.data.speedometer_reading = newValues.data.end_reading || newValues.data.start_reading;
-            await updateVehicle(vehicle.data);
+        if(vehicle && vehicle.speedometer_reading){
+            vehicle.speedometer_reading = value.end_reading || value.start_reading;
+            await updateVehicle(vehicle);
         }
-        const response = await (await updateTrip(newValues.data.id,newValues.data))?.json();
+        const response = await updateTrip(value)
         // console.log("awaited json response",response)
-        const newData = TripsDBSchema.safeParse(response);
-        if(newData.success){
+        if(response){
             // console.log("Sending data back from submitTrip: ",newData.data)
-            return newData.data;
+            return response;
         }
     }else{
-        const data = TripsDBSchema.safeParse(value)
         // console.log("Data recived in else part")
-
-        if(data.success){
-            // console.log("Data Successfuly parsed")
-            data.data.isRunning = true
-            data.data.start_time = new Date().toISOString()
-            // console.log("Data after parsing: ",data.data)
-            const createTripResponse =await(await createTrip(data.data)).json()
-            const newTripData = TripFormSchema.safeParse(createTripResponse)
-            if(newTripData.success){
-                return newTripData.data
-            }else{
-                console.log(newTripData.error.errors)
-            }
-        }else{
-            console.log(data.error.errors)
-            return data.error.errors
-        }
+        value.isRunning = true
+        value.start_time = new Date().toISOString()
+        // console.log("Data after parsing: ",data.data)
+        const createTripResponse =await createTrip(value)
+        if(createTripResponse) return createTripResponse
+        
     }
 }
