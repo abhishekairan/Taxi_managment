@@ -4,53 +4,60 @@ import { useEffect, useState } from 'react';
 
 import {
   ActionIcon,
-  Avatar,
-  Badge,
-  Flex,
   Group,
-  HoverCard,
-  MantineColor,
-  Modal,
-  MultiSelect,
-  Stack,
   Text,
   TextInput,
   Tooltip,
-  UnstyledButton,
   useMantineTheme,
 } from '@mantine/core';
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
-import { IconCloudDownload, IconEye, IconPencil, IconSearch, IconTrash } from '@tabler/icons-react';
+import {  IconPencil, IconSearch, IconTrash } from '@tabler/icons-react';
 import sortBy from 'lodash/sortBy';
 import {
   DataTable,
   DataTableProps,
   DataTableSortStatus,
 } from 'mantine-datatable';
-import { useRouter } from 'next/navigation';
 
-import { PATH_INVOICES } from '@/routes';
-import { EditExpenseFormType, ExpenseTableType } from '@/lib/type';
-import EditExpenseModal from './EditExpenseModal';
+import { DriverUserType, ExpenseDBType, ExpenseTableType } from '@/lib/type';
+import DeleteExpenseModal from './DeleteExpenseModal';
 
 const PAGE_SIZES = [5, 10, 20];
 
 const ICON_SIZE = 18;
 
+const fetchData = async () => {
+  const expenses = await fetch(new URL('/api/expenses','http://localhost:3000'))
+  const expensesData = await expenses.json()
+  // console.log("expensesData:",expensesData)
+  const drivers = await fetch(new URL('/api/user/driver','http://localhost:3000'))
+  const driversData = await drivers.json()
+  // console.log("driversData:",driversData)
+  let data: ExpenseTableType[]
+  if( drivers && expenses){
+    data = expensesData.data.map((v: ExpenseDBType)=>{
+        return {...v,driver_id:(driversData.filter((d: DriverUserType)=>d.id==v.driver_id))[0]}
+    })
+    return data
+  }
+  return []
+}
+const newdata = await fetchData()
 
 type ExpenseTableProps = {
-  data: ExpenseTableType[];
   userId?: number;
   tripId?: number;
+  setEditData: any
+  editModelHandler: any
+  editData: any
 };
 
-const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
+const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData }: ExpenseTableProps) => {
   // console.log(data)
   const theme = useMantineTheme();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-  const [selectedRecords, setSelectedRecords] = useState<ExpenseTableType[]>([]);
-  const [records, setRecords] = useState<ExpenseTableType[]>(data.slice(0, pageSize));
+  const [records, setRecords] = useState<ExpenseTableType[]>(newdata.slice(0, pageSize));
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: 'full_name',
     direction: 'asc',
@@ -60,11 +67,19 @@ const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
   const [debouncedQuery] = useDebouncedValue(query, 200);
   const [debouncedQueryDescription] = useDebouncedValue(queryDescription, 200);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const router = useRouter();
+  // console.log(records.filter((item: any) => item.id==2))
 
   // State for handling edit modal
-  const [editOpened, editModelHandler] = useDisclosure(false)
-  const [editData, setEditData] = useState<EditExpenseFormType>()
+  const [deleteOpened, DeleteModelHandler] = useDisclosure(false)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+
+  useEffect(() => {
+    const updateRecords = async() => {
+      const data = await fetchData()
+      setRecords(data.slice(0, pageSize))
+    }
+    updateRecords()
+  },[editData,deleteId])
 
   const columns: DataTableProps<ExpenseTableType>['columns'] = [
     {
@@ -123,14 +138,17 @@ const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
             <ActionIcon 
               onClick={() =>{
                 setEditData({...item,driver_id: item.driver_id.id})
-                console.log("EditData:",editData)
                 editModelHandler.open()
               }}>
               <IconPencil color='green' size={ICON_SIZE} />
             </ActionIcon>
           </Tooltip>
           <Tooltip label="Delete Expense">
-            <ActionIcon>
+            <ActionIcon
+              onClick={() =>{
+                setDeleteId(item.id)
+                DeleteModelHandler.open()
+              }}>
               <IconTrash color='red' size={ICON_SIZE} />
             </ActionIcon>
           </Tooltip>
@@ -146,12 +164,12 @@ const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
   useEffect(() => {
     const from = (page - 1) * pageSize;
     const to = from + pageSize;
-    const d = sortBy(data, sortStatus.columnAccessor) as ExpenseTableType[];
+    const d = sortBy(newdata, sortStatus.columnAccessor) as ExpenseTableType[];
     const dd = sortStatus.direction === 'desc' ? d.reverse() : d;
     let filtered = dd.slice(from, to) as ExpenseTableType[];
 
     if (debouncedQuery || selectedStatuses.length) {
-      filtered = data
+      filtered = records
         .filter(({ driver_id }) => {
           if(!driver_id?.name) return false
           if (
@@ -175,19 +193,28 @@ const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
         .slice(from, to);
     }
     if(debouncedQueryDescription || selectedStatuses.length){
-      filtered = data.filter(({description})=>{
-        if(debouncedQueryDescription != '' && !description?.toLocaleLowerCase().includes(debouncedQueryDescription.trim().toLowerCase())){
+      filtered = records.filter(({description})=>{
+        if(!description) return false
+        if(debouncedQueryDescription != '' && !description?.toLowerCase().includes(debouncedQueryDescription.trim().toLowerCase())){
           return false
         }
-        return true
+        
+          // @ts-ignore
+          if (
+            selectedStatuses.length &&
+            !selectedStatuses.some((s) => s === status)
+          ) {
+            return false;
+          }
+          return true;
       }).slice(from,to)
     }
 
     setRecords(filtered);
-  }, [sortStatus, data, page, pageSize, debouncedQuery, selectedStatuses,debouncedQueryDescription]);
+  }, [sortStatus, page, pageSize, debouncedQuery, selectedStatuses,debouncedQueryDescription]);
 
   return (<>
-    <EditExpenseModal opened={editOpened} Modelhandler={editModelHandler} data={editData} setData={setEditData}/>
+    <DeleteExpenseModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>
     <DataTable
       minHeight={10}
       verticalSpacing="xs"
@@ -196,13 +223,11 @@ const ExpenseTable = ({ data, userId, tripId }: ExpenseTableProps) => {
       // @ts-ignore
       columns={columns}
       records={records}
-      selectedRecords={selectedRecords}
       // @ts-ignore
-      onSelectedRecordsChange={setSelectedRecords}
       totalRecords={
         debouncedQuery || selectedStatuses.length > 0
           ? records.length
-          : data.length
+          : newdata.length
       }
       recordsPerPage={pageSize}
       page={page}

@@ -194,6 +194,7 @@ export async function createExpense(data: ExpenseDBType) {
 }
 
 export async function updateExpense(updates: ExpenseDBType) {
+  if(!updates.id) return null
   const response = await db.update(expense).set(updates).where(eq(expense.id, updates.id));
   // console.log(response)
   if(response.changes>0){
@@ -201,4 +202,12 @@ export async function updateExpense(updates: ExpenseDBType) {
     if(row) return row 
   }
   return null
+}
+
+export async function deleteExpense(id: number) {
+  const response = await db.delete(expense).where(eq(expense.id, id));
+  if(!response) return false
+  const row = await getExpense(id)
+  if(!row) return true
+  return false
 }

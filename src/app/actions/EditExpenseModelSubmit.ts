@@ -1,14 +1,23 @@
 "use server"
 
-import { updateExpense } from "@/db/utilis";
+import { createExpense, updateExpense } from "@/db/utilis";
 import { EditExpenseFormSchema, EditExpenseFormType, ExpenseDBSchema } from "@/lib/type";
 
 export default async function EditExpenseModelSubmit(values: EditExpenseFormType){
-    console.log(values)
-    const newValues = ExpenseDBSchema.safeParse(values)
-    console.log("newValues:",newValues)
-    if(newValues.success){
-        const response = await updateExpense(newValues.data);
-        return true
+    if(!values.id){
+        const newValues = ExpenseDBSchema.safeParse(values)
+        if(newValues.success){
+            const response = await createExpense(newValues.data);
+            if(response) return response
+            return undefined
+        }
     }
+    const newValues = ExpenseDBSchema.safeParse(values)
+    if(newValues.success){
+        console.log("newValues:",newValues)
+        const response = await updateExpense(newValues.data);
+        if(response) return response
+        return undefined
+    }
+    console.log("newValues:",newValues.error.errors)
 }

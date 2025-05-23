@@ -67,7 +67,7 @@ export type TripsDBType = z.infer<typeof TripsDBSchema>
 
 // Expense Schema
 export const ExpenseDBSchema = z.object({
-  id: z.coerce.number(),
+  id: z.coerce.number().optional(),
   driver_id: z.coerce.number().nullable(),
   trip_id: z.coerce.number().nullable(),
   amount: z.coerce.number().nullable(),
@@ -110,7 +110,13 @@ export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
 export type TripFormObject = z.infer<typeof TripFormSchema>
 
 // Edit Expense Model Form Schema
-export const EditExpenseFormSchema = ExpenseDBSchema.omit({created_at:true})
+export const EditExpenseFormSchema = z.object({
+  id: z.coerce.number().optional(),
+  driver_id: z.coerce.string().nonempty("Select Driver"),
+  trip_id: z.coerce.string().optional().nullable(),
+  amount: z.coerce.number().nonnegative("Enter correct Amount"),
+  description: z.string().nonempty("Enter Description"),
+})
 // Edit Expense Model Form type
 export type EditExpenseFormType = z.infer<typeof EditExpenseFormSchema>
 
