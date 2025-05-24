@@ -27,7 +27,7 @@ export async function GET() {
             .where(eq(users.id, parseInt(userData.userId)))
             .get();
 
-        console.log('Database user data:', user);
+        // console.log('Database user data:', user);
 
         if (!user) {
             return NextResponse.json({ user: null });
@@ -40,7 +40,7 @@ export async function GET() {
             phoneNumber: user.phone_number || '',
         };
 
-        console.log('Complete user data being sent:', completeUserData);
+        // console.log('Complete user data being sent:', completeUserData);
 
         return NextResponse.json({ user: completeUserData });
     } catch (error) {

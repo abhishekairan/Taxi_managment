@@ -83,10 +83,10 @@ const TripForm = ({ formData }: any) => {
     // console.log("Response recived after updating trip in TripForm:",response)
     const verifiedResponse = TripFormSchema.safeParse(response)
     if(verifiedResponse.success){
-      // console.log("Successfully parsed response from server into TripFormSchema")
+      // console.log("Successfully parsed response from server into TripFormSchema",verifiedResponse.data)
       // setformData(response)
-      reset()
-      setValue('isRunning',false,{shouldValidate:true})
+      reset(verifiedResponse.data)
+      // setValue('isRunning',false,{shouldValidate:true})
     }else{
       console.log(verifiedResponse.error)
     }

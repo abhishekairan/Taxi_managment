@@ -1,10 +1,10 @@
 "use server"
 
-import { createTrip, getVehicle, getVehicleByNumber, updateTrip, updateVehicle } from "@/db/utilis";
-import { TripFormObject, TripFormSchema, TripsDBSchema, TripsDBType, VehcileDBSchema } from "@/lib/type";
+import { createTrip, getVehicleByNumber, updateTrip, updateVehicle } from "@/db/utilis";
+import { TripFormObject } from "@/lib/type";
 
 export default async function (value: TripFormObject){
-    // console.log("submittrip values:",newValues)
+    // console.log("submittrip values:",value)
     if(value.id && value.id > 0){
         value.isRunning = false;
         value.end_time = new Date().toISOString();
@@ -24,8 +24,9 @@ export default async function (value: TripFormObject){
         // console.log("Data recived in else part")
         value.isRunning = true
         value.start_time = new Date().toISOString()
-        // console.log("Data after parsing: ",data.data)
+        // console.log("Data after parsing: ",value)
         const createTripResponse =await createTrip(value)
+        // console.log("createTripResponse: ",createTripResponse)
         if(createTripResponse) return createTripResponse
         
     }

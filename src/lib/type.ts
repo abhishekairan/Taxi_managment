@@ -104,10 +104,10 @@ export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
   message: "Start Reading is required",
   path: ['start_reading']
 }).refine((value)=>{
-  if(value.start_reading && !value.end_reading){
-    return false
+  if(!value.isRunning && !value.end_reading){
+    return true
   }
-  return true
+  return false
 },{
   message: "End Reading is required",
   path: ['end_reading']
