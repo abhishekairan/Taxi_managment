@@ -5,6 +5,7 @@ import { join } from 'path';
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
+    console.log(formData)
     const file = formData.get('file') as File;
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });

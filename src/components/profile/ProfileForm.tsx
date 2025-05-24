@@ -1,7 +1,6 @@
 'use client';
 
 import { useUserContext } from '@/context/UserContext';
-import { useForm } from '@mantine/form';
 import {
   TextInput,
   Button,
@@ -13,38 +12,69 @@ import {
   FileInput,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { updateProfile } from '@/app/actions/profile';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ProfileFormSchema, ProfileFormType, useUserType } from '@/lib/type';
+import { IconUser } from '@tabler/icons-react';
 
 export default function ProfileForm() {
-  const { user } = useUserContext();
+  const { user, setUser } = useUserContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
 
-  const form = useForm({
-    initialValues: {
-      name: user?.name || '',
-      email: user?.email || '',
-      phoneNumber: user?.phoneNumber || '',
-      profileImage: user?.profileImage || '',
-    },
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      name: (value) => (value.length < 2 ? 'Name must have at least 2 letters' : null),
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+    getValues
+  } = useForm<ProfileFormType>({
+    resolver: zodResolver(ProfileFormSchema),
+    defaultValues: {
+      name: user?.name ?? '',
+      email: user?.email ?? '',
+      phoneNumber: user?.phoneNumber ?? '',
+      profileImage: user?.profileImage ?? '',
     },
   });
 
-  const handleProfileUpdate = async (values: typeof form.values) => {
+  // Update form values when user data changes
+  useEffect(() => {
+    if (user) {
+      reset({
+        name: user.name ?? '',
+        email: user.email ?? '',
+        phoneNumber: user.phoneNumber ?? '',
+        profileImage: user.profileImage ?? '',
+      });
+    }
+  }, [user, reset]);
+
+  const profileImage = watch('profileImage');
+
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      // Create preview URL for the selected file
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewFile(file);
+      setValue('profileImage', objectUrl, { shouldValidate: true });
+    } else {
+      setPreviewFile(null);
+    }
+  };
+
+  const handleProfileUpdate = async (values: ProfileFormType) => {
     setIsSubmitting(true);
     const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      if (key === 'profileImage' && (value as any) instanceof File) {
-        formData.append('file', value);
-      } else {
-        formData.append(key, value);
-      }
-    });
+    if (previewFile instanceof File) {
+      formData.append('file', previewFile);
+    }
 
-    if ((values.profileImage as any) instanceof File) {
+    if (previewFile instanceof File) {
       const uploadResponse = await fetch('/api/upload/profile-image', {
         method: 'POST',
         body: formData,
@@ -70,14 +100,39 @@ export default function ProfileForm() {
         color: 'red',
       });
     } else {
-      notifications.show({
-        title: 'Success',
-        message: 'Profile updated successfully',
-        color: 'green',
-      });
+      // Update the user context with all updated fields
+      if (result.success && user) {
+        const updatedUser = {
+          ...user,
+          name: formData.get('name') as string,
+          email: formData.get('email') as string,
+          phoneNumber: formData.get('phoneNumber') as string,
+          profileImage: formData.get('profileImage') as string,
+        };
+        setUser(updatedUser);
+        
+        // Reset form with updated values
+        reset({
+          name: updatedUser.name ?? '',
+          email: updatedUser.email ?? '',
+          phoneNumber: updatedUser.phoneNumber ?? '',
+          profileImage: updatedUser.profileImage ?? '',
+        });
+
+        // Clear preview URL after successful update
+
+        notifications.show({
+          title: 'Success',
+          message: 'Profile updated successfully',
+          color: 'green',
+        });
+      }
     }
     setIsSubmitting(false);
   };
+
+  // Cleanup preview URL when component unmounts
+  // Get the avatar source
 
   return (
     <Paper radius="md" p="xl" withBorder>
@@ -85,36 +140,43 @@ export default function ProfileForm() {
         Profile Settings
       </Title>
 
-      <form onSubmit={form.onSubmit(handleProfileUpdate)}>
+      <form onSubmit={handleSubmit(handleProfileUpdate)}>
         <Stack>
           <Group>
             <Avatar
-              src={form.values.profileImage}
+              src={previewFile ? URL.createObjectURL(previewFile) : user?.profileImage || ''}
               size={120}
               radius={120}
               mx="auto"
-            />
+              color="blue"
+            >
+              <IconUser size={60} />
+            </Avatar>
             <FileInput
               label="Profile Image"
               placeholder="Upload profile image"
               accept="image/*"
-              {...form.getInputProps('profileImage')}
+              error={errors.profileImage?.message}
+              onChange={handleFileChange}
             />
           </Group>
           <TextInput
             label="Name"
             placeholder="Your name"
-            {...form.getInputProps('name')}
+            error={errors.name?.message}
+            {...register('name')}
           />
           <TextInput
             label="Email"
             placeholder="Your email"
-            {...form.getInputProps('email')}
+            error={errors.email?.message}
+            {...register('email')}
           />
           <TextInput
             label="Phone Number"
             placeholder="Your phone number"
-            {...form.getInputProps('phoneNumber')}
+            error={errors.phoneNumber?.message}
+            {...register('phoneNumber')}
           />
           <Button type="submit" loading={isSubmitting}>
             Update Profile

@@ -29,6 +29,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch('/api/auth/session');
         const data = await response.json();
         if (data.user) {
+          console.log('User data:', data.user);
           setUser(data.user);
         }
       } catch (error) {

@@ -126,6 +126,15 @@ export const EditExpenseFormSchema = z.object({
 // Edit Expense Model Form type
 export type EditExpenseFormType = z.infer<typeof EditExpenseFormSchema>
 
+// Profile Form Schema
+export const ProfileFormSchema = z.object({
+  name: z.string().min(2, 'Name must have at least 2 letters'),
+  email: z.string().email('Invalid email'),
+  phoneNumber: z.string().optional(),
+  profileImage: z.string().optional(),
+})
+// Profile Form Type
+export type ProfileFormType = z.infer<typeof ProfileFormSchema>
 
 // ----- Schema & Types for Tables -----
 // Expense Table Schema

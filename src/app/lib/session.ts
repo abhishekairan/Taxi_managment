@@ -4,11 +4,14 @@ import { cookies } from 'next/headers'
 import { users } from '@/db/schema'
 
 export interface SessionPayload {
-  [userId: string]: string
+  userId: string;
   email: string;
   role: string;
   name: string;
+  phoneNumber?: string;
+  profileImage?: string;
   expiresAt: string;
+  [key: string]: string | undefined;
 }
  
 const secretKey = process.env.SESSION_SECRET
@@ -41,6 +44,8 @@ export async function createSession(user: typeof users.$inferSelect) {
     email: user?.email || 'abc@example.com',
     role: user?.role || 'Driver',
     name: user?.name || 'Driver',
+    phoneNumber: user?.phone_number || '',
+    profileImage: user?.profile_image || '',
     expiresAt: expiresAt.toISOString(),
   }
   const session = await encrypt(payload)
