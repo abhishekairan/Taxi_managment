@@ -149,17 +149,15 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
               <IconPencil color='green' size={ICON_SIZE} />
             </ActionIcon>
           </Tooltip>
-          {!record.isRunning && (
-            <Tooltip label="Delete Trip">
-              <ActionIcon
-                onClick={() => {
-                  setDeleteId(record.id || null);
-                  DeleteModelHandler.open();
-                }}>
-                <IconTrash color='red' size={ICON_SIZE} />
-              </ActionIcon>
-            </Tooltip>
-          )}
+          <Tooltip label="Delete Trip">
+            <ActionIcon
+              onClick={() => {
+                setDeleteId(record.id || null);
+                DeleteModelHandler.open();
+              }}>
+              <IconTrash color='red' size={ICON_SIZE} />
+            </ActionIcon>
+          </Tooltip>
         </Group>
       ),
     },
