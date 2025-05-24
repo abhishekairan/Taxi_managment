@@ -81,7 +81,7 @@ export async function resetPassword(formData: FormData) {
         password_hash: hashedPassword,
         updated_at: new Date().toISOString(),
       })
-      .where(eq(users.id, parseInt(payload.userId)));
+      .where(eq(users.id, Number(payload.userId)));
 
     return { success: true };
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
-import { decrypt } from '@/app/lib/session';
+import { decrypt, createSession } from '@/app/lib/session';
 import db from '@/db/index';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -40,6 +40,7 @@ export async function updateProfile(formData: FormData) {
   }
 
   try {
+    // Update user in database
     await db
       .update(users)
       .set({
@@ -49,11 +50,26 @@ export async function updateProfile(formData: FormData) {
         profile_image: validatedFields.data.profileImage,
         updated_at: new Date().toISOString(),
       })
-      .where(eq(users.id, parseInt(payload.userId)));
+      .where(eq(users.id, Number(payload.userId)));
 
-    revalidatePath('/driver/profile' as string);
+    // Get updated user data
+    const updatedUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, Number(payload.userId)))
+      .get();
+
+    if (updatedUser) {
+      // Create new session with updated user data
+      await createSession(updatedUser);
+    }
+
+    revalidatePath('/driver/profile');
+    revalidatePath('/dashboard/profile');
+    
     return { success: true };
   } catch (error) {
+    console.error('Profile update error:', error);
     return { error: 'Failed to update profile' };
   }
 }
@@ -83,7 +99,7 @@ export async function resetPassword(formData: FormData) {
         password_hash: hashedPassword,
         updated_at: new Date().toISOString(),
       })
-      .where(eq(users.id, parseInt(payload.userId)));
+      .where(eq(users.id, Number(payload.userId)));
 
     return { success: true };
   } catch (error) {

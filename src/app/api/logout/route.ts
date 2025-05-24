@@ -1,27 +1,33 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: NextRequest) {
   if (req.method === 'POST') {
     try {
-      const cookieStore = await cookies();
-      const session = cookieStore.get('session');
-      console.log('Session before deletion:', session);
+      const response = NextResponse.json({ message: 'Logout successful' });
+      
+      // Delete the session cookie with same attributes as when it was set
+      response.cookies.set('session', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        expires: new Date(0),
+        priority: 'high'
+      });
 
-      // Delete the session cookie
-      await cookieStore.delete('session');
-      console.log('Cookies after deletion:', cookieStore.getAll());
-
-      return NextResponse.json({ message: 'Logout successful' });
+      return response;
     } catch (error) {
       console.error('Error during logout:', error);
       return NextResponse.json(
-        { message: 'Logout failed' })
+        { message: 'Logout failed' },
+        { status: 500 }
+      );
     }
   }
 
-  // Handle other HTTP methods
-  res.setHeader('Allow', ['POST']);
-  return res.status(405).end(`Method ${req.method} Not Allowed`);
+  return NextResponse.json(
+    { message: 'Method not allowed' },
+    { status: 405 }
+  );
 }

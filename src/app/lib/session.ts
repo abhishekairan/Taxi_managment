@@ -38,7 +38,7 @@ export async function decrypt(session: string | undefined = '') {
 }
 
 export async function createSession(user: typeof users.$inferSelect) {
-  const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   const payload = {
     userId: String(user.id),
     email: user?.email || 'abc@example.com',
@@ -53,10 +53,11 @@ export async function createSession(user: typeof users.$inferSelect) {
  
   cookieStore.set('session', session, {
     httpOnly: true,
-    secure: true,
-    expires: expiresAt,
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
     path: '/',
+    expires: expiresAt,
+    priority: 'high'
   })
 
   return session
@@ -75,10 +76,11 @@ export async function updateSession() {
   const cookieStore = await cookies()
   cookieStore.set('session', session, {
     httpOnly: true,
-    secure: true,
-    expires: expires,
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
     path: '/',
+    expires: expires,
+    priority: 'high'
   })
 }
 

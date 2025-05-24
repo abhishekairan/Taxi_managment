@@ -15,6 +15,7 @@ type User = {
 type UserContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
+  refreshUser: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,26 +23,37 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    // Fetch user data when the provider mounts
-    const fetchUser = async () => {
-      try {
-        const response = await fetch('/api/auth/session');
-        const data = await response.json();
-        if (data.user) {
-          console.log('User data:', data.user);
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/auth/session', {
+        credentials: 'include',  // Important for cookies
+        headers: {
+          'Cache-Control': 'no-cache',  // Prevent caching
+        },
+      });
+      const data = await response.json();
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setUser(null);
+    }
+  };
 
+  // Initial fetch
+  useEffect(() => {
     fetchUser();
   }, []);
 
+  const refreshUser = async () => {
+    await fetchUser();
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

@@ -7,14 +7,14 @@ import { eq } from "drizzle-orm";
 import { SessionPayload } from "@/app/lib/session";
 
 export async function GET() {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session")?.value;
-    
-    if (!sessionCookie) {
-        return NextResponse.json({ user: null });
-    }
-
     try {
+        const cookieStore = await cookies();
+        const sessionCookie = cookieStore.get("session")?.value;
+        
+        if (!sessionCookie) {
+            return NextResponse.json({ user: null });
+        }
+
         const userData = await decrypt(sessionCookie) as SessionPayload;
         if (!userData?.userId) {
             return NextResponse.json({ user: null });
@@ -27,24 +27,31 @@ export async function GET() {
             .where(eq(users.id, parseInt(userData.userId)))
             .get();
 
-        // console.log('Database user data:', user);
-
         if (!user) {
             return NextResponse.json({ user: null });
         }
 
         // Combine session data with database data
         const completeUserData: SessionPayload = {
-            ...userData,
-            profileImage: user.profile_image || '',
+            userId: String(user.id),
+            email: user.email || '',
+            role: user.role || '',
+            name: user.name || '',
             phoneNumber: user.phone_number || '',
+            profileImage: user.profile_image || '',
+            expiresAt: userData.expiresAt,
         };
 
-        // console.log('Complete user data being sent:', completeUserData);
-
-        return NextResponse.json({ user: completeUserData });
+        return NextResponse.json({ 
+            user: completeUserData 
+        }, {
+            headers: {
+                'Cache-Control': 'no-store, must-revalidate',
+                'Pragma': 'no-cache',
+            }
+        });
     } catch (error) {
-        console.error('Error decrypting session:', error);
+        console.error('Error in session route:', error);
         return NextResponse.json({ user: null });
     }
 }
