@@ -21,6 +21,7 @@ import {
 
 import { DriverUserType, ExpenseDBType, ExpenseTableType } from '@/lib/type';
 import DeleteExpenseModal from './DeleteExpenseModal';
+import { useUserContext } from '@/context/UserContext';
 
 const PAGE_SIZES = [5, 10, 20];
 
@@ -53,6 +54,11 @@ type ExpenseTableProps = {
 };
 
 const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData }: ExpenseTableProps) => {
+
+  const {user} = useUserContext()
+  if(user?.role == 'driver'){
+    newdata.filter((item: any) => item.driver_id.id == user.userId)
+  }
   // console.log(data)
   const theme = useMantineTheme();
   const [page, setPage] = useState(1);
@@ -88,23 +94,6 @@ const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData 
       sortable: true
     },
     {
-      accessor: 'driver_id.name',
-      title: 'Driver',
-      render: ({driver_id}: any) => <Text>{driver_id.name}</Text>,
-      sortable: true,
-      filter: (
-        <TextInput
-          label="Drivers"
-          description="Show drivers whose names include the specified text"
-          placeholder="Search drivers..."
-          leftSection={<IconSearch size={16} />}
-          value={query}
-          onChange={(e) => setQuery(e.currentTarget.value)}
-        />
-      ),
-      filtering: query !== '',
-    },
-    {
       accessor: 'amount',
       sortable: true,
       render: (item: any) => <Text>₹{item.amount}</Text>,
@@ -129,7 +118,29 @@ const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData 
       sortable: true,
       render:(item: any)=> <Text>{new Date(item.created_at).toDateString()}</Text>
     },
+    
+  ];
+
+  const columnDriverName = 
     {
+      accessor: 'driver_id.name',
+      title: 'Driver',
+      render: ({driver_id}: any) => <Text>{driver_id.name}</Text>,
+      sortable: true,
+      filter: (
+        <TextInput
+          label="Drivers"
+          description="Show drivers whose names include the specified text"
+          placeholder="Search drivers..."
+          leftSection={<IconSearch size={16} />}
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+        />
+      ),
+      filtering: query !== '',
+    }
+
+  const columnAction = {
       accessor: '',
       title: 'Actions',
       render: (item: any) => (
@@ -154,8 +165,9 @@ const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData 
           </Tooltip>
         </Group>
       ),
-    },
-  ];
+    }
+    {user?.role == 'admin' && columns.push(columnDriverName)}
+    columns.push(columnAction)
   useEffect(() => {
     setPage(1);
   }, [pageSize]);

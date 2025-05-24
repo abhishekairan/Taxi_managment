@@ -11,15 +11,12 @@ import {
   Text,
 } from '@mantine/core';
 import { IconDotsVertical, IconPlus } from '@tabler/icons-react';
-
-import ExpenseTable from './ExpenseTable/ExpenseTable';
-import EditExpenseModal from './ExpenseTable/EditExpenseModal';
 import { useDisclosure } from '@mantine/hooks';
-import { EditExpenseFormType } from '@/lib/type';
 import { useState } from 'react';
 import { useUserContext } from '@/context/UserContext';
-
-
+import { TripFormObject } from '@/lib/type';
+import TripTable from './TripTable/TripTable';
+import EditTripModal from './TripTable/EditTripModal';
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',
@@ -27,37 +24,43 @@ const PAPER_PROPS: PaperProps = {
   radius: 'md',
 };
 
-function Page() {
-  const {user} = useUserContext()
-  const [editOpened, editModelHandler] = useDisclosure(false)
-  const [editData, setEditData] = useState<EditExpenseFormType | null>()
+function Trips() {
+  const {user} = useUserContext();
+  const [editOpened, editModelHandler] = useDisclosure(false);
+  const [editData, setEditData] = useState<TripFormObject | null>();
 
   return (
     <>
       <>
-        <title>Expenses</title>
+        <title>Trips</title>
       </>
-      <EditExpenseModal opened={editOpened} Modelhandler={editModelHandler} data={editData} setData={setEditData}/>
+      <EditTripModal opened={editOpened} Modelhandler={editModelHandler} data={editData} setData={setEditData}/>
       <Container fluid>
         <Stack gap="lg">
             <Group justify='flex-start'>
-            <Button leftSection={<IconPlus size={18}/>} onClick={() =>{
-              setEditData(null)
-              editModelHandler.open()
-            }}>Add Expense</Button>
+            <Button 
+              leftSection={<IconPlus size={18}/>} 
+              onClick={() => {
+                setEditData(null);
+                editModelHandler.open();
+              }}>
+              Add Trip
+            </Button>
             </Group>
-            
           
           <Paper {...PAPER_PROPS}>
             <Group justify="space-between" mb="md">
               <Text fz="lg" fw={600}>
-                Expenses
+                Trips
               </Text>
               <ActionIcon>
                 <IconDotsVertical size={18} />
               </ActionIcon>
             </Group>
-            <ExpenseTable editData={editData} setEditData={setEditData} editModelHandler={editModelHandler} 
+            <TripTable 
+              editData={editData} 
+              setEditData={setEditData} 
+              editModelHandler={editModelHandler} 
             />
           </Paper>
         </Stack>
@@ -66,4 +69,4 @@ function Page() {
   );
 }
 
-export default Page;
+export default Trips;

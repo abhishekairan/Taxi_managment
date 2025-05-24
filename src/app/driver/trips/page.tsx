@@ -1,11 +1,6 @@
 import React from 'react'
+import Trips from '@/components/driver/Trips/Trips';
 
-const page = () => {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function Page() {
+  return <Trips />;
 }
-
-export default page
