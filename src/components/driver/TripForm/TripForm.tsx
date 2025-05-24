@@ -34,7 +34,7 @@ const PAPER_PROPS: PaperProps = {
 
 // Getting vehicles
 const vehiclesResponse = await (
-  await fetch(new URL("/api/vehicle", "http://localhost:3000"))
+  await fetch(new URL("/api/vehicle",process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
 ).json();
 let vehicles: { value: string; label: string }[] | null = null; // variable to store all vehicle id and vehicle number
 if (vehiclesResponse) {
@@ -78,15 +78,21 @@ const TripForm = ({ formData }: any) => {
 
   // On Submit Function
   const OnSubmitTripForm = async (values: TripFormObject) => {
-    // console.log("OnSubmitTripForm Triggered")
+    console.log("OnSubmitTripForm Triggered")
     const response = await submitTrip(values)
     // console.log("Response recived after updating trip in TripForm:",response)
     const verifiedResponse = TripFormSchema.safeParse(response)
     if(verifiedResponse.success){
-      // console.log("Successfully parsed response from server into TripFormSchema",verifiedResponse.data)
+      console.log("Successfully parsed response from server into TripFormSchema",verifiedResponse.data)
       // setformData(response)
-      reset(verifiedResponse.data)
-      // setValue('isRunning',false,{shouldValidate:true})
+      if(verifiedResponse.data.isRunning){
+        // console.log("Resetting form data to current trip data")
+        reset(verifiedResponse.data)
+      }else{
+        // console.log("Resetting form data to empty")
+        reset()
+        setValue('isRunning',false,{shouldValidate:true})
+      }
     }else{
       console.log(verifiedResponse.error)
     }

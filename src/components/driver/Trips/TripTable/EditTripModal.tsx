@@ -11,7 +11,7 @@ import { useUserContext } from '@/context/UserContext';
 
 // Getting vehicles
 const fetchVehicles = async () => {
-  const response = await fetch(new URL('/api/vehicle','http://localhost:3000'));
+  const response = await fetch(new URL('/api/vehicle', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
   const data = await response.json();
   // console.log("vehicle data:",data);
   if (data) {

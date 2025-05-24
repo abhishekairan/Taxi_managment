@@ -22,7 +22,7 @@ const DeleteTripModal = ({opened, Modelhandler, id, setId}: any) => {
             variant='filled'
             color='red'
             onClick={async () => {
-              await fetch(new URL(`/api/trip/${id}`, 'http://localhost:3000'), {
+              await fetch(new URL(`/api/trip/${id}`, process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'), {
                 method: 'DELETE'
               })
               setId(null)

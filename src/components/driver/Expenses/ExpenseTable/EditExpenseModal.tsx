@@ -16,16 +16,16 @@ import {
 } from "@mantine/core";
 import { IconCar, IconCurrencyRupee, IconUser } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 // getting all driver for select menu
-const drivers = await(await fetch(new URL('/api/user/driver','http://localhost:3000'))).json()
+const drivers = await(await fetch(new URL('/api/user/driver',process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))).json()
 const driverSelect: {label:string,value:string}[] = drivers.map((d: DriverUserType)=>{return {value:String(d.id),label:d.name||""}})
 // console.log("driverSelect:",driverSelect)
 
 // getting all vehicles for select menu
-const trips = await(await fetch(new URL('/api/trip','http://localhost:3000'))).json()
+const trips = await(await fetch(new URL('/api/trip',process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))).json()
 const tripSelect: {label:string,value:string}[] = trips.map((v: TripsDBType)=>{return {value:String(v.id),label:`${new Date(v.end_time).toDateString()} - ${v.vehicle_number}`}})
 // console.log("tripSelect:",tripSelect)
 

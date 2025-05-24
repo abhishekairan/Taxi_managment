@@ -13,25 +13,34 @@ const route = async () => {
     await redirect('/');
   }
     // Call the API route to delete the session
-  const response = await fetch(new URL('/api/logout','http://localhost:3000'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  try {
+    const response = await fetch(new URL('/api/logout', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   
-  if (!response.ok) {
-    console.error('Error during logout:', response.statusText);
-    return;
+    if (!response.ok) {
+      console.error('Error during logout:', response.statusText);
+      return;
+    }
+  
+    const data = await response.json();
+    console.log(data);
+    return (
+      <div>
+        Logout successful!
+      </div>
+    );
+  } catch (error) {
+    console.error('Error during logout:', error);
+    return (
+      <div>
+        An error occurred during logout. Please try again later.
+      </div>
+    );
   }
-  
-  const data = await response.json();
-  console.log(data);
-  return (
-    <div>
-      Logout successful!
-    </div>
-  );
 };
 
 export default route;

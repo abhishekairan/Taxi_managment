@@ -19,7 +19,7 @@ const DeleteExpenseModal = ({opened,Modelhandler,id,setId}:any) => {
         variant='filled'
         color='red'
         onClick={async () => {
-          const response = await fetch(new URL(`/api/expenses/${id}`,'http://localhost:3000'),{
+          const response = await fetch(new URL(`/api/expenses/${id}`,process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'),{
             method:'DELETE'
           })
           setId(null)

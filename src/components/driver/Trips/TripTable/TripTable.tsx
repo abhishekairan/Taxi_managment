@@ -13,7 +13,7 @@ const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;
 
 const fetchData = async () => {
-  const trips = await fetch(new URL('/api/trip','http://localhost:3000'));
+  const trips = await fetch(new URL('/api/trip', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
   const tripsData = await trips.json();
   return tripsData || [];
 };
@@ -29,21 +29,18 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
   const theme = useMantineTheme();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-  const [records, setRecords] = useState<TripsDBType[]>([]);
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<TripsDBType>>({
-    columnAccessor: 'created_at',
+  const [records, setRecords] = useState<TripsDBType[]>([]);  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<TripsDBType>>({
+    columnAccessor: 'id',
     direction: 'desc',
   });
   const [queryVehicle, setQueryVehicle] = useState('');
   const [queryPassenger, setQueryPassenger] = useState('');
   const [debouncedQueryVehicle] = useDebouncedValue(queryVehicle, 200);
   const [debouncedQueryPassenger] = useDebouncedValue(queryPassenger, 200);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   // State for handling delete modal
   const [deleteOpened, DeleteModelHandler] = useDisclosure(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
   useEffect(() => {
     const updateRecords = async() => {
       const data = await fetchData();
@@ -53,11 +50,46 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       if(user?.role === 'driver') {
         filteredData = data.filter((item: TripsDBType) => item.driver_id === Number(user.userId));
       }
+
+      // Apply search filters
+      if (debouncedQueryVehicle) {
+        filteredData = filteredData.filter((item: TripsDBType) => 
+          item.vehicle_number.toLowerCase().includes(debouncedQueryVehicle.toLowerCase())
+        );
+      }
       
-      setRecords(filteredData.slice(0, pageSize));
+      if (debouncedQueryPassenger) {
+        filteredData = filteredData.filter((item: TripsDBType) => 
+          item.passenger_name.toLowerCase().includes(debouncedQueryPassenger.toLowerCase())
+        );
+      }
+
+      // Apply sorting
+      const sortedData = [...filteredData].sort((a, b) => {
+        const aValue = a[sortStatus.columnAccessor as keyof TripsDBType];
+        const bValue = b[sortStatus.columnAccessor as keyof TripsDBType];
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return sortStatus.direction === 'asc' 
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
+
+        if (aValue === null || aValue === undefined) return sortStatus.direction === 'asc' ? 1 : -1;
+        if (bValue === null || bValue === undefined) return sortStatus.direction === 'asc' ? -1 : 1;
+
+        return sortStatus.direction === 'asc' 
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue);
+      });
+      
+      // Apply pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize;
+      setRecords(sortedData.slice(from, to));
     };
     updateRecords();
-  }, [editData, deleteId, user, pageSize]);
+  }, [editData, deleteId, user, pageSize, debouncedQueryVehicle, debouncedQueryPassenger, sortStatus, page]);
 
   const columns = [
     {
@@ -164,7 +196,7 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
   ];
 
   return (<>
-    <DeleteTripModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>
+    <DeleteTripModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>    
     <DataTable<TripsDBType>
       minHeight={10}
       verticalSpacing="xs"

@@ -88,8 +88,7 @@ export type ExpenseDBType = z.infer<typeof ExpenseDBSchema>
 // ----- Schema & Types for Forms ----- 
 // Trip Form Schema
 export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
-  if(value.start_reading){
-    if(!value.end_reading) return false;
+  if(value.start_reading && value.end_reading){
     return value.end_reading>=value.start_reading
   }
   return true

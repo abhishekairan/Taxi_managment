@@ -28,10 +28,10 @@ const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;
 
 const fetchData = async () => {
-  const expenses = await fetch(new URL('/api/expenses','http://localhost:3000'))
+  const expenses = await fetch(new URL('/api/expenses', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
   const expensesData = await expenses.json()
   // console.log("expensesData:",expensesData)
-  const drivers = await fetch(new URL('/api/user/driver','http://localhost:3000'))
+  const drivers = await fetch(new URL('/api/user/driver', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
   const driversData = await drivers.json()
   // console.log("driversData:",driversData)
   let data: ExpenseTableType[]
