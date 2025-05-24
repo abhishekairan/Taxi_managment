@@ -7,6 +7,8 @@ type User = {
   email: string;
   name: string;
   role: string;
+  phoneNumber?: string;
+  profileImage?: string;
   expiresAt: string;
 };
 

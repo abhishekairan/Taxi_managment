@@ -16,6 +16,7 @@
     "@mantine/dates": "^7.17.5",
     "@mantine/form": "^7.17.5",
     "@mantine/hooks": "^7.17.5",
+    "@mantine/notifications": "^7.17.5",
     "@mantine/nprogress": "^7.17.5",
     "@storybook/addon-essentials": "^8.6.12",
     "@storybook/addon-interactions": "^8.6.12",

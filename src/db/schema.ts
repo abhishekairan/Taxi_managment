@@ -8,7 +8,11 @@ export const users = sqliteTable('users', {
   email: text('email').unique(),
   password_hash: text('password_hash'),
   role: text('role'),
-  session_token: text('session_token')
+  session_token: text('session_token'),
+  profile_image: text('profile_image'),
+  phone_number: text('phone_number'),
+  created_at: text('created_at').default(sql`(current_timestamp)`),
+  updated_at: text('updated_at').default(sql`(current_timestamp)`)
 });
 
 export const vehicles = sqliteTable('vehicles', {
@@ -37,7 +41,7 @@ export const trips = sqliteTable('trips', {
 
 export const expense = sqliteTable('expense', {
   id: int('id').primaryKey(),
-  driver_id: int('driver_id').references(()=>users.name),
+  driver_id: int('driver_id').references(() => users.id),
   trip_id: int('trip_id').references(() => trips.id),
   amount: int('amount'),
   description: text('description'),

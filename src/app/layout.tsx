@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MantineProvider } from "@mantine/core";
 import '@mantine/core/styles.css';
+import { Notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
 import { UserProvider } from "@/context/UserContext";
 
 const geistSans = Geist({
@@ -15,7 +17,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,11 +28,11 @@ export default function RootLayout({
         className={` ${geistSans.variable} ${geistMono.variable} antialiased `}
       >
         <MantineProvider theme={{ primaryColor: 'dark' }} >
+          <Notifications />
           <UserProvider>
             {children}
           </UserProvider>
         </MantineProvider>
-   
       </body>
     </html>
   );

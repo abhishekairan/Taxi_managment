@@ -8,6 +8,8 @@ export const useUserSchema = z.object({
   email: z.coerce.string(),
   role: z.coerce.string(),
   name: z.coerce.string(),
+  phoneNumber: z.coerce.string().optional(),
+  profileImage: z.coerce.string().optional(),
   expiresAt: z.coerce.string(),
   iat: z.coerce.number(),
   exp: z.coerce.number()
@@ -25,7 +27,11 @@ export const UsersDBSchema = z.object({
     email: z.string().nullable(),
     password_hash: z.string(),
     role: z.string(),
-    session_token: z.string()
+    session_token: z.string(),
+    profile_image: z.string().nullable(),
+    phone_number: z.string().nullable(),
+    created_at: z.string(),
+    updated_at: z.string()
 })
 // User Type
 export type UserDBType = z.infer<typeof UsersDBSchema>

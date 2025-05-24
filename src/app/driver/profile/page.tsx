@@ -1,11 +1,7 @@
-import React from 'react'
+'use client';
 
-const page = () => {
-  return (
-    <div>
-      
-    </div>
-  )
+import ProfileForm from '@/components/profile/ProfileForm';
+
+export default function DriverProfilePage() {
+  return <ProfileForm />;
 }
-
-export default page
