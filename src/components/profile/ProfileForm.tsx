@@ -89,10 +89,10 @@ export default function ProfileForm() {
         setIsSubmitting(false);
         return;
       }
-      formData.set('profileImage', uploadResult.path);
+      values.profileImage = uploadResult.path;
     }
 
-    const result = await updateProfile(formData);
+    const result = await updateProfile(values);
     if (result.error) {
       notifications.show({
         title: 'Error',
@@ -100,26 +100,23 @@ export default function ProfileForm() {
         color: 'red',
       });
     } else {
-      // Update the user context with all updated fields
-      if (result.success && user) {
+      if (result.success && result.user) {
         const updatedUser = {
-          ...user,
-          name: formData.get('name') as string,
-          email: formData.get('email') as string,
-          phoneNumber: formData.get('phoneNumber') as string,
-          profileImage: formData.get('profileImage') as string,
+          ...user!,
+          name: result.user.name || '',
+          email: result.user.email || '',
+          phoneNumber: result.user.phone_number || '',
+          profileImage: result.user.profile_image || '',
         };
         setUser(updatedUser);
         
-        // Reset form with updated values
+        // Update form with new values
         reset({
-          name: updatedUser.name ?? '',
-          email: updatedUser.email ?? '',
-          phoneNumber: updatedUser.phoneNumber ?? '',
-          profileImage: updatedUser.profileImage ?? '',
+          name: result.user.name || '',
+          email: result.user.email || '',
+          phoneNumber: result.user.phone_number || '',
+          profileImage: result.user.profile_image || '',
         });
-
-        // Clear preview URL after successful update
 
         notifications.show({
           title: 'Success',
@@ -129,6 +126,7 @@ export default function ProfileForm() {
       }
     }
     setIsSubmitting(false);
+    setPreviewFile(null);
   };
 
   // Cleanup preview URL when component unmounts
@@ -144,7 +142,7 @@ export default function ProfileForm() {
         <Stack>
           <Group>
             <Avatar
-              src={previewFile ? URL.createObjectURL(previewFile) : user?.profileImage || ''}
+              src={previewFile ? URL.createObjectURL(previewFile) : user?.profileImage || null}
               size={120}
               radius={120}
               mx="auto"

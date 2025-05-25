@@ -86,6 +86,7 @@ export type ExpenseDBType = z.infer<typeof ExpenseDBSchema>
 
 
 // ----- Schema & Types for Forms ----- 
+
 // Trip Form Schema
 export const TripFormSchema = TripsDBSchema.partial({}).refine((value)=> {
   if(value.start_reading && value.end_reading){
@@ -127,6 +128,16 @@ export const ProfileFormSchema = z.object({
 })
 // Profile Form Type
 export type ProfileFormType = z.infer<typeof ProfileFormSchema>
+
+// Profile Schema
+const ProfileSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email'),
+  phoneNumber: z.string().optional(),
+  profileImage: z.string().optional(),
+});
+// Profile Type
+export type ProfileType = z.infer<typeof ProfileSchema>
 
 // ----- Schema & Types for Tables -----
 // Expense Table Schema

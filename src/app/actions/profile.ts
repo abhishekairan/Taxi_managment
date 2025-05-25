@@ -6,38 +6,21 @@ import { decrypt, createSession } from '@/app/lib/session';
 import db from '@/db/index';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import { ProfileFormSchema, ProfileFormType } from '@/lib/type';
+import { getUserByEmail } from '@/db/utilis';
 
-const ProfileSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email'),
-  phoneNumber: z.string().optional(),
-  profileImage: z.string().optional(),
-});
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(formData: ProfileFormType) {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session')?.value;
-  if (!sessionCookie) {
-    return { error: 'Not authenticated' };
-  }
-
-  const payload = await decrypt(sessionCookie);
-  if (!payload || !payload.userId) {
-    return { error: 'Invalid session' };
-  }
-
-  const validatedFields = ProfileSchema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    phoneNumber: formData.get('phoneNumber'),
-    profileImage: formData.get('profileImage'),
-  });
-
+  console.log('formData:', formData);
+  const validatedFields = ProfileFormSchema.safeParse(formData);
+  const user = await getUserByEmail(formData.email);
   if (!validatedFields.success) {
+    console.log('Validation errors:', validatedFields.error.errors);
     return { error: 'Invalid form data' };
   }
+  console.log(validatedFields.data)
 
   try {
     // Update user in database
@@ -50,13 +33,13 @@ export async function updateProfile(formData: FormData) {
         profile_image: validatedFields.data.profileImage,
         updated_at: new Date().toISOString(),
       })
-      .where(eq(users.id, Number(payload.userId)));
+      .where(eq(users.id, Number(user?.id)));
 
     // Get updated user data
     const updatedUser = await db
       .select()
       .from(users)
-      .where(eq(users.id, Number(payload.userId)))
+      .where(eq(users.id, Number(user?.id)))
       .get();
 
     if (updatedUser) {
@@ -67,7 +50,7 @@ export async function updateProfile(formData: FormData) {
     revalidatePath('/driver/profile');
     revalidatePath('/dashboard/profile');
     
-    return { success: true };
+    return { success: true, user: updatedUser };
   } catch (error) {
     console.error('Profile update error:', error);
     return { error: 'Failed to update profile' };

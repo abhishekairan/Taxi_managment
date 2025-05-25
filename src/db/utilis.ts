@@ -31,6 +31,12 @@ export async function getUser(id: number) {
   return result[0]
 }
 
+export async function getUserByEmail(id: string) {
+  const result = await db.select().from(users).where(eq(users.email, id));
+  if(!result) return null;
+  return result[0]
+}
+
 export async function createUser(data: typeof users.$inferInsert) {
   const response = await db.insert(users).values(data);
   if (!response.lastInsertRowid) return null
