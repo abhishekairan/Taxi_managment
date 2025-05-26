@@ -18,6 +18,7 @@ import {
   DataTableProps,
   DataTableSortStatus,
 } from 'mantine-datatable';
+import 'mantine-datatable/styles.layer.css';
 
 import { DriverUserType, ExpenseDBType, ExpenseTableType } from '@/lib/type';
 import DeleteExpenseModal from './DeleteExpenseModal';

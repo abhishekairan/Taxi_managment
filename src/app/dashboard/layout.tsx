@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
 
-import { MainLayout } from '@/layout/Main';
+import { DashboardLayout } from '@/layout/Dashboard';
 
 type Props = {
   children: ReactNode;
 };
 
-function DashboardLayout({ children }: Props) {
-  return <MainLayout>{children}</MainLayout>;
+function Layout({ children }: Props) {
+  return <DashboardLayout>{children}</DashboardLayout>;
 }
 
-export default DashboardLayout;
+export default Layout;

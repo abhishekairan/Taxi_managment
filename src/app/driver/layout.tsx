@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
 
-import { MainLayout } from '@/layout/driver/';
+import { DriverLayout } from '@/layout/Driver';
 
 type Props = {
   children: ReactNode;
 };
 
 function DashboardLayout({ children }: Props) {
-  return <MainLayout>{children}</MainLayout>;
+  return <DriverLayout>{children}</DriverLayout>;
 }
 
 export default DashboardLayout;

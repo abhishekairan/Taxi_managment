@@ -8,6 +8,11 @@ import { useDisclosure, useLocalStorage, useMediaQuery } from '@mantine/hooks';
 import AppMain from '@/components/AppMain';
 import HeaderNav from '@/components/HeaderNav';
 import Navigation from '@/components/Navigation';
+import {
+  IconCar,
+  IconCurrencyRupee,
+  IconUserCode,
+} from '@tabler/icons-react';
 
 export type SidebarState = 'hidden' | 'mini' | 'full';
 
@@ -15,7 +20,19 @@ type Props = {
   children: ReactNode;
 };
 
-export function MainLayout({ children }: Props) {
+
+const links = [
+  {
+    title: 'Dashboard',
+    links: [
+      { label: 'Trips', icon: IconCar, link: '/dashboard/trips' },
+      { label: 'Expenses', icon: IconCurrencyRupee, link: '/dashboard/expenses' },
+      { label: 'Users', icon: IconUserCode, link: '/dashboard/users' },
+    ],
+  },
+];
+
+export function DashboardLayout({ children }: Props) {
   const theme = useMantineTheme();
   const tablet_match = useMediaQuery('(max-width: 768px)');
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure(false,{
@@ -65,6 +82,7 @@ export function MainLayout({ children }: Props) {
       </AppShell.Header>
       <AppShell.Navbar>
         <Navigation
+          links={links}
           onClose={toggleMobile}
           sidebarState={sidebarState}
           onSidebarStateChange={setSidebarState}

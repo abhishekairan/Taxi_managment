@@ -1,65 +1,75 @@
 'use client';
 
-import { useUserContext } from '@/context/UserContext';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { DataTable } from 'mantine-datatable';
-import { Button, Group, Stack, Title } from '@mantine/core';
-import { getAllUsers } from '@/app/actions/users';
+import { useState, useEffect } from 'react';
+import { Container, Title, Group, Button, Paper, Modal, LoadingOverlay } from '@mantine/core';
+import { IconUserPlus } from '@tabler/icons-react';
+import { UserTableType } from '@/lib/type';
+import UserForm from '@/components/dashboard/users/UserForm';
+import UserTable from '@/components/dashboard/users/UserTable';
 
 export default function UsersPage() {
-  const { user } = useUserContext();
-  const router = useRouter();
-  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserTableType | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Simulate initial loading
   useEffect(() => {
-    if (user?.role !== 'admin') {
-      router.push('/dashboard');
-      return;
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Show loading for at least 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleFormClose = (shouldRefresh?: boolean) => {
+    setIsFormOpen(false);
+    setSelectedUser(null);
+    if (shouldRefresh) {
+      setRefreshKey(prev => prev + 1); // Increment refresh key to trigger table reload
     }
-
-    const fetchUsers = async () => {
-      const result = await getAllUsers();
-      if (result.error) {
-        router.push('/dashboard');
-      } else if (result.users) {
-        setUsers(result.users);
-      }
-    };
-
-    fetchUsers();
-  }, [user, router]);
+  };
 
   return (
-    <Stack>
-      <Title order={2}>User Management</Title>
-      <DataTable
-        borderColor="gray.3"
-        borderRadius="sm"
-        striped
-        highlightOnHover
-        data={users}
-        columns={[
-          { accessor: 'name', title: 'Name' },
-          { accessor: 'email', title: 'Email' },
-          { accessor: 'phone_number', title: 'Phone Number' },
-          { accessor: 'role', title: 'Role' },
-          {
-            accessor: 'actions',
-            title: 'Actions',
-            render: (record) => (
-              <Group>
-                <Button
-                  variant="light"
-                  onClick={() => router.push(`/dashboard/users/edit/${record.id}`)}
-                >
-                  Edit User
-                </Button>
-              </Group>
-            ),
-          },
-        ]}
+    <Container size="xl" pos="relative">
+      <LoadingOverlay 
+        visible={isLoading}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+        loaderProps={{ type: "dots" }}
       />
-    </Stack>
+      
+      <Paper p="md" radius="md">
+        <Group justify="space-between" mb="lg">
+          <Title order={2}>User Management</Title>
+          <Button
+            leftSection={<IconUserPlus size={16} />}
+            onClick={() => setIsFormOpen(true)}
+          >
+            Add User
+          </Button>
+        </Group>
+
+        <UserTable
+          setEditData={setSelectedUser}
+          editModelHandler={{
+            open: () => setIsFormOpen(true),
+          }}
+          refreshTrigger={refreshKey}
+        />
+      </Paper>
+
+      <Modal
+        opened={isFormOpen}
+        onClose={() => handleFormClose()}
+        title={selectedUser ? 'Edit User' : 'Add New User'}
+        size="md"
+      >
+        <UserForm 
+          user={selectedUser} 
+          onClose={handleFormClose}
+        />
+      </Modal>
+    </Container>
   );
 } 

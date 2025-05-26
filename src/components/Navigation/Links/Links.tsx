@@ -51,8 +51,7 @@ export function LinksGroup(props: LinksGroupProps) {
         component="button"
         className={classes.link}
         onClick={() => {
-          console.log("On Clicked triggered for ",link.label)
-          router.replace(link.link);
+          router.push(link.link);
           closeSidebar();
         }}
         data-active={link.link.toLowerCase() === pathname || undefined}

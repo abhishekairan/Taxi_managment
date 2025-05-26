@@ -31,6 +31,7 @@ import { useRouter } from 'next/navigation';
 import ErrorAlert from '@/components/ErrorAlert';
 import { PATH_INVOICES } from '@/routes';
 import { InvoiceStatus, Invoices } from '@/types';
+import 'mantine-datatable/styles.layer.css';
 
 const PAGE_SIZES = [5, 10, 20];
 

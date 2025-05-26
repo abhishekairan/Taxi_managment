@@ -8,6 +8,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useUserContext } from '@/context/UserContext';
 import { TripsDBType } from '@/lib/type';
 import DeleteTripModal from './DeleteTripModal';
+import 'mantine-datatable/styles.layer.css';
 
 const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;

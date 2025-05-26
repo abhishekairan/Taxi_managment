@@ -146,3 +146,39 @@ export const ExpenseTableSchema = ExpenseDBSchema.extend({
 }) 
 // Expense Table Type
 export type ExpenseTableType = z.infer<typeof ExpenseTableSchema>
+
+// ----- Schema & Types for User Management Forms ----- 
+
+// User Management Form Schema
+export const UserManagementFormSchema = z.object({
+  id: z.coerce.number().optional(),
+  name: z.string().min(2, 'Name must have at least 2 letters'),
+  email: z.string().email('Invalid email'),
+  password: z.string()
+    .min(6, 'Password must be at least 6 characters')
+    .optional(),
+  role: z.enum(['ADMIN', 'DRIVER']),
+  phoneNumber: z.string()
+    .min(10, 'Phone number must be at least 10 digits')
+    .optional()
+    .nullable(),
+  profileImage: z.string().optional().nullable(),
+});
+
+// User Management Form Type
+export type UserManagementFormType = z.infer<typeof UserManagementFormSchema>;
+
+// User Table Schema (for displaying users in table)
+export const UserTableSchema = z.object({
+  id: z.number(),
+  name: z.string().nullable(),
+  email: z.string().nullable(),
+  role: z.string(),
+  phone_number: z.string().nullable(),
+  profile_image: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+// User Table Type
+export type UserTableType = z.infer<typeof UserTableSchema>;
