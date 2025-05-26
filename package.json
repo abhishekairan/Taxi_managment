@@ -6,9 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -18,11 +16,6 @@
     "@mantine/hooks": "^7.17.5",
     "@mantine/notifications": "^7.17.5",
     "@mantine/nprogress": "^7.17.5",
-    "@storybook/addon-essentials": "^8.6.12",
-    "@storybook/addon-interactions": "^8.6.12",
-    "@storybook/addon-links": "^8.6.12",
-    "@storybook/addon-onboarding": "^8.6.12",
-    "@storybook/addon-styling-webpack": "^1.0.1",
     "@tabler/icons-react": "^3.31.0",
     "bcryptjs": "^3.0.2",
     "dayjs": "^1.11.13",
@@ -35,12 +28,10 @@
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
-    "storybook": "^8.6.12",
     "zod": "^3.24.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@storybook/nextjs": "^8.6.12",
     "@tailwindcss/postcss": "^4.1.5",
     "@types/better-sqlite3": "^7.6.13",
     "@types/lodash": "^4.17.16",
