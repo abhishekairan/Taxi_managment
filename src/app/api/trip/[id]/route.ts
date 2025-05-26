@@ -20,6 +20,6 @@ export async function UPDATE(req: NextRequest, {params}: {params: {id:string}},)
     const {id} = await params
     const body = await req.json();
     console.log(body)
-    const response = await updateTrip(Number(id),body.data);
+    const response = await updateTrip(body.data);
     return NextResponse.json(response,{status: 200});
 }

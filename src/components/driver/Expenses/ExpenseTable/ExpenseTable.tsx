@@ -37,7 +37,7 @@ const fetchData = async () => {
   // console.log("driversData:",driversData)
   let data: ExpenseTableType[]
   if( drivers && expenses){
-    data = expensesData.data.map((v: ExpenseDBType)=>{
+    data = expensesData.map((v: ExpenseDBType)=>{
         return {...v,driver_id:(driversData.filter((d: DriverUserType)=>d.id==v.driver_id))[0]}
     })
     return data

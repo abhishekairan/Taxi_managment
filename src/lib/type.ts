@@ -37,7 +37,7 @@ export const UsersDBSchema = z.object({
 export type UserDBType = z.infer<typeof UsersDBSchema>
 
 // Driver Schema
-export const DriverUserSchema = UsersDBSchema.omit({password_hash:true,role:true,session_token:true})
+export const DriverUserSchema = UsersDBSchema.omit({password_hash:true,role:true,session_token:true,created_at:true,updated_at:true})
 // Driver Type
 export type DriverUserType = z.infer<typeof DriverUserSchema>
 
@@ -140,12 +140,20 @@ const ProfileSchema = z.object({
 export type ProfileType = z.infer<typeof ProfileSchema>
 
 // ----- Schema & Types for Tables -----
+
 // Expense Table Schema
 export const ExpenseTableSchema = ExpenseDBSchema.extend({
   driver_id: DriverUserSchema
 }) 
 // Expense Table Type
 export type ExpenseTableType = z.infer<typeof ExpenseTableSchema>
+
+// Trip Table Schema
+export const TripTableSchema = TripsDBSchema.extend({
+  driver_id: DriverUserSchema
+})
+// Trip Table Type
+export type TripTableType = z.infer<typeof TripTableSchema>
 
 // ----- Schema & Types for User Management Forms ----- 
 
@@ -182,3 +190,26 @@ export const UserTableSchema = z.object({
 
 // User Table Type
 export type UserTableType = z.infer<typeof UserTableSchema>;
+
+// User Form Schema for create/update
+export const UserFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
+  confirmPassword: z.string().optional(),
+  role: z.enum(["admin", "driver"]),
+  phone_number: z.string().optional(),
+  profile_image: z.string().optional(),
+}).refine((data) => {
+  // Only validate confirmPassword if password is provided
+  if (data.password && data.password !== data.confirmPassword) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+// User Form Type
+export type UserFormType = z.infer<typeof UserFormSchema>;

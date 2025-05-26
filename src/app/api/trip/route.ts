@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createTrip, getAllTrips } from "@/db/utilis";
+import { createTrip, getAllDrivers, getAllTrips } from "@/db/utilis";
 
 // PUT request to create a trip
 export async function PUT(req: NextRequest) {
@@ -10,6 +10,14 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    const data = await getAllTrips();
+    const trips = await getAllTrips();
+    const drivers = await getAllDrivers();
+    const data = trips?.map((trip) => {
+        const driver = drivers?.find((d) => d.id === trip.driver_id);
+        return {
+            ...trip,
+            driver_id: driver || null
+        };
+    })
     return NextResponse.json(data,{status: 200});
 }

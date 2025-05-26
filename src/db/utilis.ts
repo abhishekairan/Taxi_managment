@@ -61,7 +61,7 @@ export async function deleteUser(id: number) {
 
 // ===== Driver =====
 export async function getAllDrivers() {
-  const rows = await db.select({id: users.id,name: users.name,email:users.email}).from(users).where(eq(users.role, 'driver'));
+  const rows = await db.select({id: users.id,name: users.name,email:users.email,profile_image:users.profile_image,phone_number: users.phone_number}).from(users).where(eq(users.role, 'driver'));
   if(!rows) return null
   return rows;
 }
