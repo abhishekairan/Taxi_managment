@@ -1,6 +1,6 @@
 "use client";
 
-import { Modal, TextInput, NumberInput, Button, Group, Select, ComboboxItem } from '@mantine/core';
+import { Modal, TextInput, NumberInput, Button, Group, Select, ComboboxItem, Text } from '@mantine/core';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TripFormObject, TripFormSchema } from '@/lib/type';
@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import submitTrip from '@/app/actions/submitTrip';
 import { useUserContext } from '@/context/UserContext';
+import { get } from 'lodash';
 
 // Getting vehicles
 const fetchVehicles = async () => {
@@ -35,7 +36,8 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
     handleSubmit,
     reset,
     setValue,
-    watch
+    watch,
+    getValues
   } = useForm<TripFormObject>({
     resolver: zodResolver(TripFormSchema),
     defaultValues: data
@@ -53,6 +55,7 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
   }, [data, reset, user]);
 
   const onSubmit = async (values: TripFormObject) => {
+    // console.log("Submitted values:", values);
     const response = await submitTrip(values);
     if(response) {
       setData(response);
@@ -91,6 +94,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
           error={errors.vehicle_number?.message}
           mb="sm"
         />
+        {errors?.vehicle_number && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.vehicle_number.message}`}</Text>
+        )}
         
         <TextInput
           label="Passenger Name"
@@ -99,6 +108,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
           error={errors.passenger_name?.message}
           mb="sm"
         />
+        {errors?.passenger_name && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.passenger_name.message}`}</Text>
+        )}
 
         <TextInput
           label="From Location"
@@ -107,6 +122,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
           error={errors.from_location?.message}
           mb="sm"
         />
+        {errors?.from_location && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.from_location.message}`}</Text>
+        )}
 
         <TextInput
           label="To Location"
@@ -115,6 +136,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
           error={errors.to_location?.message}
           mb="sm"
         />
+        {errors?.to_location && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.to_location.message}`}</Text>
+        )}
 
         <TextInput
           label="Start Reading"
@@ -123,6 +150,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
           error={errors.start_reading?.message}
           mb="sm"
         />
+        {errors?.start_reading && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.start_reading.message}`}</Text>
+        )}
 
         {!isRunning && (
           <TextInput
@@ -133,7 +166,12 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
             mb="sm"
           />
         )}
-
+        {errors?.end_reading && (
+          <Text
+            c="red"
+            size="sm"
+          >{`${errors.end_reading.message}`}</Text>
+        )}
         <Group justify="flex-end" mt="md">
           <Button type="submit" variant="filled">
             {data ? "Update Trip" : "Create Trip"}

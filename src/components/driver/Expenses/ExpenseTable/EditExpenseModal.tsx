@@ -49,7 +49,7 @@ const EditExpenseModal = ({ opened, Modelhandler, data, setData }: any) => {
     if (data) {
       reset(data); 
     }
-  }, [data, reset]);
+  }, [data, reset,setData]);
 
   const onSelectDriverId = (value:string | null, obj: ComboboxItem) => {
     if(value){
@@ -66,7 +66,14 @@ const EditExpenseModal = ({ opened, Modelhandler, data, setData }: any) => {
   const onSubmit = async (values: EditExpenseFormType) => {
     const response = await EditExpenseModelSubmit(values)
     if(response){
-      setData(response)
+      setData({...response,id: undefined})
+      reset({
+        driver_id: String(response.driver_id),
+        trip_id: String(response.trip_id),
+        amount: response.amount? response.amount : undefined,
+        description: response.description? response.description : undefined,
+        id: undefined
+      })
       Modelhandler.close()
       router.refresh()
     }

@@ -166,6 +166,11 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
       filtering: queryVehicle !== '',
     },
     {
+      accessor: 'passenger_name',
+      title: 'Passenger',
+      sortable: true,
+    },
+    {
       accessor: 'start_reading',
       title: 'Start Reading',
       sortable: true,
@@ -237,7 +242,7 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
   return (
     <DataTable<TripTableType>
       minHeight={10}
-      verticalSpacing="xs"
+      verticalSpacing="lg"
       striped
       highlightOnHover
       columns={columns}

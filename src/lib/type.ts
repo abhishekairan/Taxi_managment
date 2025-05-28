@@ -139,6 +139,8 @@ const ProfileSchema = z.object({
 // Profile Type
 export type ProfileType = z.infer<typeof ProfileSchema>
 
+
+
 // ----- Schema & Types for Tables -----
 
 // Expense Table Schema
@@ -154,6 +156,8 @@ export const TripTableSchema = TripsDBSchema.extend({
 })
 // Trip Table Type
 export type TripTableType = z.infer<typeof TripTableSchema>
+
+
 
 // ----- Schema & Types for User Management Forms ----- 
 

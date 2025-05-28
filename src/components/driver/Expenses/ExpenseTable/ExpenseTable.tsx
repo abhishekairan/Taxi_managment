@@ -32,17 +32,7 @@ const fetchData = async () => {
   const expenses = await fetch(new URL('/api/expenses', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
   const expensesData = await expenses.json()
   // console.log("expensesData:",expensesData)
-  const drivers = await fetch(new URL('/api/user/driver', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
-  const driversData = await drivers.json()
-  // console.log("driversData:",driversData)
-  let data: ExpenseTableType[]
-  if( drivers && expenses){
-    data = expensesData.map((v: ExpenseDBType)=>{
-        return {...v,driver_id:(driversData.filter((d: DriverUserType)=>d.id==v.driver_id))[0]}
-    })
-    return data
-  }
-  return []
+  return expensesData || []
 }
 const newdata = await fetchData()
 
@@ -54,11 +44,12 @@ type ExpenseTableProps = {
   editData: any
 };
 
-const ExpenseTable = ({ userId, tripId, setEditData, editModelHandler, editData }: ExpenseTableProps) => {
+const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableProps) => {
 
   const {user} = useUserContext()
   if(user?.role == 'driver'){
-    newdata.filter((item: any) => item.driver_id.id == user.userId)
+    console.log(newdata)
+    newdata.filter((item: ExpenseTableType) => item.driver_id.id == Number(user.userId))
   }
   // console.log(data)
   const theme = useMantineTheme();

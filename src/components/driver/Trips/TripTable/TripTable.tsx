@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ActionIcon, Group, Text, TextInput, Tooltip, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Group, Text, TextInput, Tooltip } from '@mantine/core';
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
 import { IconPencil, IconSearch, IconTrash } from '@tabler/icons-react';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useUserContext } from '@/context/UserContext';
-import { TripsDBType } from '@/lib/type';
+import { TripTableType } from '@/lib/type';
 import DeleteTripModal from './DeleteTripModal';
 import 'mantine-datatable/styles.layer.css';
 
@@ -27,10 +27,9 @@ type TripTableProps = {
 
 const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) => {
   const {user} = useUserContext();
-  const theme = useMantineTheme();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-  const [records, setRecords] = useState<TripsDBType[]>([]);  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<TripsDBType>>({
+  const [records, setRecords] = useState<TripTableType[]>([]);  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<TripTableType>>({
     columnAccessor: 'id',
     direction: 'desc',
   });
@@ -49,26 +48,28 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       
       // Filter by user if driver
       if(user?.role === 'driver') {
-        filteredData = data.filter((item: TripsDBType) => item.driver_id === Number(user.userId));
+        filteredData = data.filter((item: TripTableType) => item.driver_id.id === Number(user.userId));
+        // console.log("User is a driver, filtered trips by user ID:", data);
+
       }
 
       // Apply search filters
       if (debouncedQueryVehicle) {
-        filteredData = filteredData.filter((item: TripsDBType) => 
+        filteredData = filteredData.filter((item: TripTableType) => 
           item.vehicle_number.toLowerCase().includes(debouncedQueryVehicle.toLowerCase())
         );
       }
       
       if (debouncedQueryPassenger) {
-        filteredData = filteredData.filter((item: TripsDBType) => 
+        filteredData = filteredData.filter((item: TripTableType) => 
           item.passenger_name.toLowerCase().includes(debouncedQueryPassenger.toLowerCase())
         );
       }
 
       // Apply sorting
       const sortedData = [...filteredData].sort((a, b) => {
-        const aValue = a[sortStatus.columnAccessor as keyof TripsDBType];
-        const bValue = b[sortStatus.columnAccessor as keyof TripsDBType];
+        const aValue = a[sortStatus.columnAccessor as keyof TripTableType];
+        const bValue = b[sortStatus.columnAccessor as keyof TripTableType];
 
         if (typeof aValue === 'string' && typeof bValue === 'string') {
           return sortStatus.direction === 'asc' 
@@ -153,30 +154,31 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
     {
       accessor: 'start_time',
       title: 'Start Time',
-      render: (record: TripsDBType) => <Text>{new Date(record.start_time || '').toLocaleString()}</Text>,
+      render: (record: TripTableType) => <Text>{new Date(record.start_time || '').toLocaleString()}</Text>,
       sortable: true,
     },
     {
       accessor: 'end_time',
       title: 'End Time',
-      render: (record: TripsDBType) => record.end_time ? <Text>{new Date(record.end_time).toLocaleString()}</Text> : '-',
+      render: (record: TripTableType) => record.end_time ? <Text>{new Date(record.end_time).toLocaleString()}</Text> : '-',
       sortable: true,
     },
     {
       accessor: 'isRunning',
       title: 'Status',
-      render: (record: TripsDBType) => <Text color={record.isRunning ? 'green' : 'blue'}>{record.isRunning ? 'Active' : 'Completed'}</Text>,
+      render: (record: TripTableType) => <Text color={record.isRunning ? 'green' : 'blue'}>{record.isRunning ? 'Active' : 'Completed'}</Text>,
       sortable: true,
     },
     {
       accessor: 'actions',
       title: 'Actions',
-      render: (record: TripsDBType) => (
+      render: (record: TripTableType) => (
         <Group gap="sm">
           <Tooltip label="Edit Trip">
             <ActionIcon 
               onClick={() => {
-                setEditData(record);
+                // console.log("record to be set for editing:",record)
+                setEditData({...record, driver_id: record.driver_id.id});
                 editModelHandler.open();
               }}>
               <IconPencil color='green' size={ICON_SIZE} />
@@ -198,7 +200,7 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
 
   return (<>
     <DeleteTripModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>    
-    <DataTable<TripsDBType>
+    <DataTable<TripTableType>
       minHeight={10}
       verticalSpacing="xs"
       striped

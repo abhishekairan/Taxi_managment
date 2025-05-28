@@ -15,9 +15,9 @@ export async function GET(req: NextRequest, {params}: {params: Promise<{id:strin
 
 export async function DELETE(req: NextRequest, {params}: {params: Promise<{id:string}>},) {
     const {id} = await params
-    // console.log(driverId)
+    console.log(id)
     const response = await deleteExpense(Number(id));
-    // console.log("Response from trip/driver: ",response)
+    console.log("Response from trip/driver: ",response)
     if(response){
         return NextResponse.json({success:response},{status:200})
     }

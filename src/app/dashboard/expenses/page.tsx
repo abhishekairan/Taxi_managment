@@ -31,7 +31,7 @@ export default function ExpensesPage() {
   };
 
   return (
-    <Container size="xl" pos="relative">
+    <Container size="2xl" pos="relative">
       <LoadingOverlay 
         visible={isLoading}
         zIndex={1000}
