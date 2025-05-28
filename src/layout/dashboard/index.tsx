@@ -28,6 +28,7 @@ const links = [
       { label: 'Trips', icon: IconCar, link: '/dashboard/trips' },
       { label: 'Expenses', icon: IconCurrencyRupee, link: '/dashboard/expenses' },
       { label: 'Users', icon: IconUserCode, link: '/dashboard/users' },
+      { label: 'Vehicles', icon: IconCar, link: '/dashboard/vehicles' },
     ],
   },
 ];

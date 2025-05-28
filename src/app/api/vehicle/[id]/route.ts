@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, {params}: {params:{id:string}},) {
 export async function UPDATE(req: NextRequest, {params}: {params:{id:string}},) {
     const {id} = await params
     const body = await req.json();
-    const response = await updateVehicle(Number(id),body.data);
+    const response = await updateVehicle(body.data);
     if(!response) {
         return new Response("Vehicle not found", { status: 404 });
     }

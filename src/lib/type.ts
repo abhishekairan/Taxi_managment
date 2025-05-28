@@ -43,7 +43,7 @@ export type DriverUserType = z.infer<typeof DriverUserSchema>
 
 // Vehicle Schema
 export const VehcileDBSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number().optional(),
   vehicle_number: z.string(),
   speedometer_reading: z.number().nullable(),
   default_passenger: z.string().optional().nullable(),

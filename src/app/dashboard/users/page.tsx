@@ -49,7 +49,6 @@ export default function UsersPage() {
             Add User
           </Button>
         </Group>
-
         <UserTable
           setEditData={setSelectedUser}
           editModelHandler={{

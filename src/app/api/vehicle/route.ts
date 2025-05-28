@@ -1,22 +1,11 @@
 import { createVehicle, getAllVehicles } from "@/db/utilis";
+import { VehcileDBSchema } from "@/lib/type";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    // const token = req.headers.get("Authorization");
-    // if (!token) {
-    //     return new Response("Unauthorized", { status: 401 });
-    // }
-    // const user = await fetch("https://api.example.com/user", {
-    //     headers: {
-    //         Authorization: token,
-    //     },
-    // });
-    // if (!user.ok) {
-    //     return new Response("Unauthorized", { status: 401 });
-    // }
     const response = await getAllVehicles();
     if (!response) {
-        return new Response("No vehicle found", { status: 404 });
+        return NextResponse.json("No vehicle found", { status: 404 });
     }
     return NextResponse.json(response,{status: 200});
     // return new Response(JSON.stringify(response), { status: 200 });
@@ -24,9 +13,17 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     const body = await req.json();
-    const user = await createVehicle(body.data);
-    if (!user) {
-        return new Response("Error while adding Vehicle", { status: 404 });
+    // console.log("🚀 ~ file: route.ts:20 ~ PUT ~ body:", body);
+    const data = VehcileDBSchema.safeParse(body);
+    if (!data.success) {
+        return NextResponse.json(
+            `Error while parsing data: ${data.error.errors}`,
+            { status: 400 }
+        );
     }
-    return new Response(JSON.stringify(user), { status: 200 });
+    const user = await createVehicle(data.data);
+    if (!user) {
+        return NextResponse.json("Error while adding Vehicle", { status: 404 });
+    }
+    return NextResponse.json(JSON.stringify(user), { status: 200 });
 }

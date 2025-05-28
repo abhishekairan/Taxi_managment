@@ -95,6 +95,7 @@ export async function deleteVehicle(id: number) {
 }
 
 export async function createVehicle(data: VehicleDBType) {
+  console.log(data)
   const response = await db.insert(vehicles).values(data);
   if(!response) return null
   const row = await getVehicle(Number(response.lastInsertRowid))
@@ -103,6 +104,7 @@ export async function createVehicle(data: VehicleDBType) {
 }
 
 export async function updateVehicle(vehicle: VehicleDBType) {
+  if(!vehicle.id) return null
   const response = await db.update(vehicles).set(vehicle).where(eq(vehicles.id, vehicle.id));
   if(!response) return null
   const row = await getVehicleById(vehicle.id) 
