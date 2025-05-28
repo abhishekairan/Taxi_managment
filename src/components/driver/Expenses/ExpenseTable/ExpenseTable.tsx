@@ -20,7 +20,7 @@ import {
 } from 'mantine-datatable';
 import 'mantine-datatable/styles.layer.css';
 
-import { DriverUserType, ExpenseDBType, ExpenseTableType } from '@/lib/type';
+import { ExpenseTableType } from '@/lib/type';
 import DeleteExpenseModal from './DeleteExpenseModal';
 import { useUserContext } from '@/context/UserContext';
 
@@ -34,7 +34,7 @@ const fetchData = async () => {
   // console.log("expensesData:",expensesData)
   return expensesData || []
 }
-const newdata = await fetchData()
+const data = await fetchData()
 
 type ExpenseTableProps = {
   userId?: number;
@@ -47,15 +47,11 @@ type ExpenseTableProps = {
 const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableProps) => {
 
   const {user} = useUserContext()
-  if(user?.role == 'driver'){
-    console.log(newdata)
-    newdata.filter((item: ExpenseTableType) => item.driver_id.id == Number(user.userId))
-  }
   // console.log(data)
   const theme = useMantineTheme();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
-  const [records, setRecords] = useState<ExpenseTableType[]>(newdata.slice(0, pageSize));
+  const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
+  const [records, setRecords] = useState<ExpenseTableType[]>(data.slice(0, pageSize));
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: 'full_name',
     direction: 'asc',
@@ -74,7 +70,12 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
   useEffect(() => {
     const updateRecords = async() => {
       const data = await fetchData()
-      setRecords(data.slice(0, pageSize))
+      let newdata = data;
+      if(user?.role.toLowerCase() == 'driver'){
+        console.log(data)
+        newdata = data.filter((item: ExpenseTableType) => item.driver_id.id == Number(user.userId))
+      }
+      setRecords(newdata.slice(0, pageSize))
     }
     updateRecords()
   },[editData,deleteId])
@@ -168,7 +169,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
   useEffect(() => {
     const from = (page - 1) * pageSize;
     const to = from + pageSize;
-    const d = sortBy(newdata, sortStatus.columnAccessor) as ExpenseTableType[];
+    const d = sortBy(data, sortStatus.columnAccessor) as ExpenseTableType[];
     const dd = sortStatus.direction === 'desc' ? d.reverse() : d;
     let filtered = dd.slice(from, to) as ExpenseTableType[];
 
@@ -231,7 +232,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
       totalRecords={
         debouncedQuery || selectedStatuses.length > 0
           ? records.length
-          : newdata.length
+          : data.length
       }
       recordsPerPage={pageSize}
       page={page}

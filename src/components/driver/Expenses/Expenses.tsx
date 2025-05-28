@@ -28,7 +28,6 @@ const PAPER_PROPS: PaperProps = {
 };
 
 function Page() {
-  const {user} = useUserContext()
   const [editOpened, editModelHandler] = useDisclosure(false)
   const [editData, setEditData] = useState<EditExpenseFormType | null>()
 

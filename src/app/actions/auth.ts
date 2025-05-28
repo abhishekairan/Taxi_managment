@@ -63,13 +63,23 @@ export const handleSubmit = async (prevstate: FormState, form: FormData) => {
       };
     }
 
+    // First, clear any existing session token
+    await db
+      .update(users)
+      .set({ session_token: null })
+      .where(eq(users.id, user.id))
+      .run();
+
+    // Create new session
     const session_token = await createSession(user);
 
+    // Update user with new session token
     await db
       .update(users)
       .set({ session_token: session_token })
       .where(eq(users.id, user.id))
       .run();
+
     if(user.role === "admin") {
       redirect("/dashboard");
     }else{

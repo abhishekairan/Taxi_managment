@@ -47,7 +47,7 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       let filteredData = data;
       
       // Filter by user if driver
-      if(user?.role === 'driver') {
+      if(user?.role.toLowerCase() === 'driver') {
         filteredData = data.filter((item: TripTableType) => item.driver_id.id === Number(user.userId));
         // console.log("User is a driver, filtered trips by user ID:", data);
 

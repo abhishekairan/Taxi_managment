@@ -18,10 +18,7 @@ type Props = {
 export function MainLayout({ children }: Props) {
   const theme = useMantineTheme();
   const tablet_match = useMediaQuery('(max-width: 768px)');
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure(false,{
-    onOpen: () => console.log('Opened'),
-    onClose: () => console.log('Closed'),
-  });
+  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure(false);
   const [desktopOpened] = useDisclosure(true);
   const [sidebarState, setSidebarState] = useLocalStorage<SidebarState>({
     key: 'mantine-nav-state',
