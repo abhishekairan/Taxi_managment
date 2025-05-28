@@ -19,6 +19,7 @@ type TripTableProps = {
 
 export default function TripTable({ setEditData, editModelHandler, refreshTrigger = 0 }: TripTableProps) {
   const [records, setRecords] = useState<TripTableType[]>([]);
+  const [allRecords, setAllRecords] = useState<TripTableType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
@@ -51,6 +52,9 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
             trip.vehicle_number?.toLowerCase().includes(queryVehicle.toLowerCase())
           );
         }
+
+        // Store all filtered records
+        setAllRecords(filteredTrips);
 
         // Apply sorting
         const sortedTrips = [...filteredTrips].sort((a, b) => {
@@ -106,7 +110,8 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
           });
           // Refresh the data
           const updatedTrips = await fetch('/api/trip').then(res => res.json());
-          setRecords(updatedTrips);
+          setAllRecords(updatedTrips);
+          setRecords(updatedTrips.slice(0, pageSize));
         } else {
           notifications.show({
             title: 'Error',
@@ -247,7 +252,7 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
       highlightOnHover
       columns={columns}
       records={records}
-      totalRecords={records.length}
+      totalRecords={allRecords.length}
       recordsPerPage={pageSize}
       page={page}
       onPageChange={setPage}

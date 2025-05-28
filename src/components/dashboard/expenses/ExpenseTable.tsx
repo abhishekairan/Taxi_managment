@@ -19,6 +19,7 @@ type ExpenseTableProps = {
 
 export default function ExpenseTable({ setEditData, editModelHandler, refreshTrigger = 0 }: ExpenseTableProps) {
   const [records, setRecords] = useState<ExpenseTableType[]>([]);
+  const [allRecords, setAllRecords] = useState<ExpenseTableType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
@@ -50,6 +51,9 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
             expense.description?.toLowerCase().includes(queryDescription.toLowerCase())
           );
         }
+
+        // Store all filtered records
+        setAllRecords(filteredExpenses);
 
         // Apply sorting
         const sortedExpenses = [...filteredExpenses].sort((a, b) => {
@@ -234,7 +238,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
       highlightOnHover
       columns={columns}
       records={records}
-      totalRecords={records.length}
+      totalRecords={allRecords.length}
       recordsPerPage={pageSize}
       page={page}
       onPageChange={setPage}

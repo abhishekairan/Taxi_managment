@@ -19,6 +19,7 @@ type VehicleTableProps = {
 
 export default function VehicleTable({ setEditData, editModelHandler, refreshTrigger = 0 }: VehicleTableProps) {
   const [records, setRecords] = useState<VehicleDBType[]>([]);
+  const [allRecords, setAllRecords] = useState<VehicleDBType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
@@ -50,6 +51,9 @@ export default function VehicleTable({ setEditData, editModelHandler, refreshTri
             vehicle.default_from_location?.toLowerCase().includes(queryFromLocation.toLowerCase())
           );
         }
+
+        // Store all filtered records
+        setAllRecords(filteredVehicles);
 
         // Apply sorting
         const sortedVehicles = [...filteredVehicles].sort((a, b) => {
@@ -233,7 +237,7 @@ export default function VehicleTable({ setEditData, editModelHandler, refreshTri
       highlightOnHover
       columns={columns}
       records={records}
-      totalRecords={records.length}
+      totalRecords={allRecords.length}
       recordsPerPage={pageSize}
       page={page}
       onPageChange={(p) => setPage(p)}
