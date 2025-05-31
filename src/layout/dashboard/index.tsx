@@ -11,6 +11,7 @@ import Navigation from '@/components/Navigation';
 import {
   IconCar,
   IconCurrencyRupee,
+  IconHome,
   IconUserCode,
 } from '@tabler/icons-react';
 
@@ -25,6 +26,7 @@ const links = [
   {
     title: 'Dashboard',
     links: [
+      { label: 'Home', icon: IconHome, link: '/dashboard' },
       { label: 'Trips', icon: IconCar, link: '/dashboard/trips' },
       { label: 'Expenses', icon: IconCurrencyRupee, link: '/dashboard/expenses' },
       { label: 'Users', icon: IconUserCode, link: '/dashboard/users' },

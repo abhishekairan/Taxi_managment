@@ -22,6 +22,8 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
     "jose": "^6.0.11",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "lodash": "^4.17.21",
     "mantine-datatable": "^7.17.1",
     "next": "15.3.1",

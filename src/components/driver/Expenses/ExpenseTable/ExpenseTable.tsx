@@ -48,7 +48,6 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
 
   const {user} = useUserContext()
   // console.log(data)
-  const theme = useMantineTheme();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
   const [records, setRecords] = useState<ExpenseTableType[]>(data.slice(0, pageSize));

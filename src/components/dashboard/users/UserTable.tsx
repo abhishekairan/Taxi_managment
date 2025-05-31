@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ActionIcon, Group, Text, TextInput, Tooltip, Skeleton, Center, Stack } from '@mantine/core';
-import { IconEdit, IconSearch, IconTrash } from '@tabler/icons-react';
+import { ActionIcon, Group, Text, TextInput, Tooltip, Skeleton, Center, Stack, Button } from '@mantine/core';
+import { IconEdit, IconSearch, IconTrash, IconDownload } from '@tabler/icons-react';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { notifications } from '@mantine/notifications';
 import { UserTableType, UserDBType } from '@/lib/type';
 import 'mantine-datatable/styles.layer.css';
 import { getUsers, deleteUser } from '@/app/actions/userManagement';
-import 'mantine-datatable/styles.layer.css';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;
@@ -147,6 +148,55 @@ export default function UserTable({ setEditData, editModelHandler, refreshTrigge
     }
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Users Report', 14, 15);
+    
+    // Prepare table data
+    const tableData = records.map(record => [
+      `#${record.id}`,
+      record.name || '-',
+      record.email || '-',
+      record.role || '-',
+      record.phone_number || '-',
+      record.created_at ? new Date(record.created_at).toLocaleString() : '-',
+    ]);
+
+    // Define table headers
+    const headers = [
+      'ID',
+      'Name',
+      'Email',
+      'Role',
+      'Phone',
+      'Created At'
+    ];
+
+    // Generate table
+    autoTable(doc, {
+      head: [headers],
+      body: tableData,
+      startY: 25,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold',
+      },
+    });
+
+    // Save the PDF
+    doc.save('users-report.pdf');
+  };
+
   const columns = [
     {
       accessor: 'id',
@@ -239,23 +289,37 @@ export default function UserTable({ setEditData, editModelHandler, refreshTrigge
   }
 
   return (
-    <DataTable<UserTableType>
-      minHeight={10}
-      verticalSpacing="xs"
-      striped
-      highlightOnHover
-      columns={columns}
-      records={records}
-      totalRecords={records.length}
-      recordsPerPage={pageSize}
-      page={page}
-      onPageChange={(p) => setPage(p)}
-      recordsPerPageOptions={PAGE_SIZES}
-      onRecordsPerPageChange={setPageSize}
-      sortStatus={sortStatus}
-      onSortStatusChange={setSortStatus}
-      fetching={isLoading}
-      loaderType="dots"
-    />
+    <Stack gap="md">
+      <Group justify="flex-end">
+        <Button
+          leftSection={<IconDownload size={16} />}
+          onClick={handleExportPDF}
+          disabled={isLoading}
+          variant="light"
+          color="blue"
+        >
+          Export to PDF
+        </Button>
+      </Group>
+      
+      <DataTable<UserTableType>
+        minHeight={10}
+        verticalSpacing="xs"
+        striped
+        highlightOnHover
+        columns={columns}
+        records={records}
+        totalRecords={records.length}
+        recordsPerPage={pageSize}
+        page={page}
+        onPageChange={(p) => setPage(p)}
+        recordsPerPageOptions={PAGE_SIZES}
+        onRecordsPerPageChange={setPageSize}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
+        fetching={isLoading}
+        loaderType="dots"
+      />
+    </Stack>
   );
 } 

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ActionIcon, Group, Text, TextInput, Tooltip, Skeleton, Center, Stack } from '@mantine/core';
-import { IconEdit, IconSearch, IconTrash } from '@tabler/icons-react';
+import { ActionIcon, Group, Text, TextInput, Tooltip, Skeleton, Center, Stack, Button } from '@mantine/core';
+import { IconEdit, IconSearch, IconTrash, IconDownload } from '@tabler/icons-react';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { notifications } from '@mantine/notifications';
 import { TripTableType } from '@/lib/type';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import 'mantine-datatable/styles.layer.css';
 
 const PAGE_SIZES = [5, 10, 20];
@@ -131,6 +133,59 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
     }
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Trips Report', 14, 15);
+    
+    // Prepare table data
+    const tableData = records.map(record => [
+      `#${record.id}`,
+      record.driver_id?.name || '-',
+      record.vehicle_number || '-',
+      record.passenger_name || '-',
+      record.start_reading?.toString() || '-',
+      record.end_reading?.toString() || '-',
+      record.start_time ? new Date(record.start_time).toLocaleString() : '-',
+      record.end_time ? new Date(record.end_time).toLocaleString() : '-',
+    ]);
+
+    // Define table headers
+    const headers = [
+      'ID',
+      'Driver',
+      'Vehicle',
+      'Passenger',
+      'Start Reading',
+      'End Reading',
+      'Start Time',
+      'End Time'
+    ];
+
+    // Generate table
+    autoTable(doc, {
+      head: [headers],
+      body: tableData,
+      startY: 25,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold',
+      },
+    });
+
+    // Save the PDF
+    doc.save('trips-report.pdf');
+  };
+
   const columns = [
     {
       accessor: 'id',
@@ -206,6 +261,16 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
       title: 'Actions',
       render: (trip: TripTableType) => (
         <Group gap="xs">
+          <Tooltip label="Export to PDF">
+            <ActionIcon
+              variant="subtle"
+              color="blue"
+              onClick={handleExportPDF}
+              disabled={isLoading}
+            >
+              <IconDownload size={ICON_SIZE} />
+            </ActionIcon>
+          </Tooltip>
           <Tooltip label="Edit Trip">
             <ActionIcon
               variant="subtle"
@@ -245,21 +310,35 @@ export default function TripTable({ setEditData, editModelHandler, refreshTrigge
   }
 
   return (
-    <DataTable<TripTableType>
-      minHeight={10}
-      verticalSpacing="lg"
-      striped
-      highlightOnHover
-      columns={columns}
-      records={records}
-      totalRecords={allRecords.length}
-      recordsPerPage={pageSize}
-      page={page}
-      onPageChange={setPage}
-      recordsPerPageOptions={PAGE_SIZES}
-      onRecordsPerPageChange={setPageSize}
-      sortStatus={sortStatus}
-      onSortStatusChange={setSortStatus}
-    />
+    <Stack gap="md">
+      <Group justify="flex-end">
+        <Button
+          leftSection={<IconDownload size={16} />}
+          onClick={handleExportPDF}
+          disabled={isLoading}
+          variant="light"
+          color="blue"
+        >
+          Export to PDF
+        </Button>
+      </Group>
+      
+      <DataTable<TripTableType>
+        minHeight={10}
+        verticalSpacing="lg"
+        striped
+        highlightOnHover
+        columns={columns}
+        records={records}
+        totalRecords={allRecords.length}
+        recordsPerPage={pageSize}
+        page={page}
+        onPageChange={setPage}
+        recordsPerPageOptions={PAGE_SIZES}
+        onRecordsPerPageChange={setPageSize}
+        sortStatus={sortStatus}
+        onSortStatusChange={setSortStatus}
+      />
+    </Stack>
   );
 } 
