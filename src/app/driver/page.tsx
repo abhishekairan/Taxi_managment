@@ -1,47 +1,49 @@
-import { useUser } from '@/hooks/useUser'
-import TripForm from '@/components/driver/TripForm';
-import { getActiveTripByDriverId } from '@/db/utilis';
+'use client';
 
-async function Page() {
-  const user = await useUser();
-  // console.log(user) => {
-  //   userId: '2',
-  //   email: 'driver',
-  //   role: 'driver',
-  //   name: 'User',
-  //   expiresAt: '2025-05-22T05:14:36.525Z',
-  //   iat: 1747631676,
-  //   exp: 1748236476
-  // }
-  // const response = await fetch(new URL(`/api/trip/activetrip/${user?.userId}`, 'http://localhost:3000'), {
-  //   method: 'GET',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   }
-  // })
-  if(user){
-    const data = await getActiveTripByDriverId(Number(user.userId))
-    // console.log(data)
-    if(!data){
-    const newdata = {
-      driver_id: user?.userId || 0,
-      vehicle_number: '', 
-      passenger_name: '',
-      from_location: '',
-      to_location: '',
-      start_time: '',
-      end_time: '',
-      isRunning: false
-    }
-    // console.log("No Active Trip found")
-    return (
-      <TripForm formData={newdata}></TripForm>
-    )}
-  // console.log("active trip found")
-  return (
-    <TripForm formData={data}></TripForm>
-  )
-}
+import { useEffect, useState } from 'react';
+import TripForm from '@/components/driver/TripForm';
+import { useUserContext } from '@/context/UserContext';
+
+function Page() {
+  const { user } = useUserContext();
+  const [tripData, setTripData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTripData = async () => {
+      if (user?.userId) {
+        try {
+          const response = await fetch(`/api/trip/activetrip/${user.userId}`);
+          const data = await response.json();
+          setTripData(data);
+        } catch (error) {
+          console.error('Error fetching trip data:', error);
+          // Set empty trip data on error
+          setTripData(null);
+        }
+        setLoading(false);
+      }
+    };
+
+    fetchTripData();
+  }, [user?.userId]);
+
+  if (loading || !user) {
+    return <div>Loading...</div>;
+  }
+
+  const formData = tripData || {
+    driver_id: Number(user.userId),
+    vehicle_number: '', 
+    passenger_name: '',
+    from_location: '',
+    to_location: '',
+    start_time: '',
+    end_time: '',
+    isRunning: false
+  };
+
+  return <TripForm formData={formData} />;
 }
 
 export default Page;
