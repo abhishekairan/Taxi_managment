@@ -161,10 +161,13 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
             </ActionIcon>
           </Tooltip>
         </Group>
-      ),
+      ),    }
+
+    if (user?.role === 'admin') {
+      columns.push(columnDriverName);
     }
-    {user?.role == 'admin' && columns.push(columnDriverName)}
-    columns.push(columnAction)
+    columns.push(columnAction);
+
   useEffect(() => {
     setPage(1);
   }, [pageSize]);
@@ -201,7 +204,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
     // Finally apply pagination
     const paginatedData = filteredData.slice(from, to);
     setRecords(paginatedData);
-  }, [sortStatus, page, pageSize, debouncedQuery, selectedStatuses,debouncedQueryDescription]);
+  }, [sortStatus, page, pageSize, debouncedQuery, selectedStatuses,debouncedQueryDescription,data]);
   return (<>
     <DeleteExpenseModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>
     <DataTable<ExpenseTableType>

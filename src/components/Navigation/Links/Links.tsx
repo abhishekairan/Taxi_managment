@@ -89,7 +89,7 @@ export function LinksGroup(props: LinksGroupProps) {
               <UnstyledButton
                 onClick={() => {
                   setOpened((o) => !o);
-                  link && router.push(link || '#');
+                  if (link) router.push(link);
                   closeSidebar();
                 }}
                 className={classes.control}
@@ -115,7 +115,7 @@ export function LinksGroup(props: LinksGroupProps) {
           <UnstyledButton
             onClick={() => {
               setOpened((o) => !o);
-              link && router.push(link || '#');
+              if (link) router.push(link);
               closeSidebar();
             }}
             className={classes.control}

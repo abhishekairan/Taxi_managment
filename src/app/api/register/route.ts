@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt from "bcryptjs";
 import db from "@/db/index";
 import { users } from "../../../db/schema";
@@ -6,10 +5,8 @@ import { and, eq } from "drizzle-orm";
 import { createSession } from "@/app/lib/session";
 import { NextResponse, NextRequest } from "next/server";
 
-export async function POST(req: NextRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    const { formData } = await req.json();
-    console.log(`formdata: ${formData}`);
+export async function POST(req: NextRequest) {  const { formData } = await req.json();
+  console.log(`formdata: ${formData}`);
     // console.log(`formdata Email: ${formData.email}`)
     // Validate form data
     if (!formData.email || !formData.password) {
@@ -66,10 +63,5 @@ export async function POST(req: NextRequest, res: NextApiResponse) {
         { message: "Internal server error" },
         { status: 500 }
       );
-    }
-  }
+    }  }
 
-  // Handle other HTTP methods
-  //   res.setHeader('Allow', ['POST']);
-  //   res.status(405).end(`Method ${req.method} Not Allowed`);
-}
