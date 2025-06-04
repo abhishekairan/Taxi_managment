@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { DriverLayout } from '@/layout/Driver';
+import { DriverLayout } from '@/components/driver/layout';
 
 type Props = {
   children: ReactNode;
