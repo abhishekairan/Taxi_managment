@@ -1,6 +1,6 @@
 {
   "name": "app_2",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -32,6 +32,7 @@
     "react-apexcharts": "^1.7.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.4",
+    "victory-vendor": "^37.3.6",
     "zod": "^3.24.4"
   },
   "devDependencies": {

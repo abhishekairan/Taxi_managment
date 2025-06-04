@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 
 import { AppShell, Container, rem, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useLocalStorage, useMediaQuery } from '@mantine/hooks';
+import { SidebarState } from '@/layout/Dashboard';
 
 import AppMain from '@/components/AppMain/';
 import HeaderNav from '@/components/HeaderNav';
@@ -13,8 +14,6 @@ import {
   IconCurrencyRupee,
   IconUserCode,
 } from '@tabler/icons-react';
-
-export type SidebarState = 'hidden' | 'mini' | 'full';
 
 type Props = {
   children: ReactNode;
