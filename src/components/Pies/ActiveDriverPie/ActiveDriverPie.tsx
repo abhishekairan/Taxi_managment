@@ -206,7 +206,6 @@ const ActiveDriverPie = ({ ...others }: ActiveDriverPieProps) => {
   return (
     <Surface component={Paper} {...others}>
       <Group justify="center" mb="md">
-        {/*@ts-ignore*/}
         <Chart
           options={options}
           series={series}

@@ -100,7 +100,6 @@ const MobileDesktopChart = ({ ...others }: MobileDesktopChartProps) => {
           <IconDotsVertical size={16} />
         </ActionIcon>
       </Group>
-      {/*@ts-ignore*/}
       <Chart
         options={options}
         series={series}

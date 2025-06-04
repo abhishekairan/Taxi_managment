@@ -51,7 +51,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
   const [records, setRecords] = useState<ExpenseTableType[]>(data.slice(0, pageSize));
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<ExpenseTableType>>({
     columnAccessor: 'full_name',
     direction: 'asc',
   });
@@ -185,7 +185,6 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
             return false;
           }
 
-          // @ts-ignore
           if (
             selectedStatuses.length &&
             !selectedStatuses.some((s) => s === status)
@@ -203,7 +202,6 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
           return false
         }
         
-          // @ts-ignore
           if (
             selectedStatuses.length &&
             !selectedStatuses.some((s) => s === status)
@@ -219,15 +217,13 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
 
   return (<>
     <DeleteExpenseModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>
-    <DataTable
+    <DataTable<ExpenseTableType>
       minHeight={10}
       verticalSpacing="xs"
       striped
       highlightOnHover
-      // @ts-ignore
       columns={columns}
       records={records}
-      // @ts-ignore
       totalRecords={
         debouncedQuery || selectedStatuses.length > 0
           ? records.length
@@ -239,7 +235,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
       recordsPerPageOptions={PAGE_SIZES}
       onRecordsPerPageChange={setPageSize}
       sortStatus={sortStatus}
-      onSortStatusChange={setSortStatus}
+      onSortStatusChange={(status) => setSortStatus(status)}
     />
   </>);
 };
