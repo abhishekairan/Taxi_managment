@@ -31,10 +31,8 @@ const ICON_SIZE = 18;
 const fetchData = async () => {
   const expenses = await fetch(new URL('/api/expenses', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
   const expensesData = await expenses.json()
-  // console.log("expensesData:",expensesData)
   return expensesData || []
 }
-const data = await fetchData()
 
 type ExpenseTableProps = {
   userId?: number;
@@ -45,12 +43,12 @@ type ExpenseTableProps = {
 };
 
 const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableProps) => {
-
   const {user} = useUserContext()
-  // console.log(data)
+  const [data, setData] = useState<ExpenseTableType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
-  const [records, setRecords] = useState<ExpenseTableType[]>(data.slice(0, pageSize));
+  const [records, setRecords] = useState<ExpenseTableType[]>([]);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<ExpenseTableType>>({
     columnAccessor: 'full_name',
     direction: 'asc',
@@ -64,20 +62,27 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
 
   // State for handling edit modal
   const [deleteOpened, DeleteModelHandler] = useDisclosure(false)
-  const [deleteId, setDeleteId] = useState<number | null>(null)
-
+  const [deleteId, setDeleteId] = useState<number | null>(null)  // Fetch expense data
   useEffect(() => {
-    const updateRecords = async() => {
-      const data = await fetchData()
-      let newdata = data;
-      if(user?.role.toLowerCase() == 'driver'){
-        console.log(data)
-        newdata = data.filter((item: ExpenseTableType) => item.driver_id.id == Number(user.userId))
+    const updateData = async() => {
+      try {
+        setIsLoading(true);
+        const fetchedData = await fetchData();
+        let filteredData = fetchedData;
+        if(user?.role?.toLowerCase() === 'driver' && user?.userId){
+          filteredData = fetchedData.filter((item: ExpenseTableType) => 
+            item.driver_id.id === Number(user.userId)
+          );
+        }
+        setData(filteredData);
+      } catch (error) {
+        console.error('Failed to fetch expenses:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setRecords(newdata.slice(0, pageSize))
     }
-    updateRecords()
-  },[editData,deleteId])
+    updateData();
+  }, [editData, deleteId, user?.role, user?.userId]);
 
   const columns: DataTableProps<ExpenseTableType>['columns'] = [
     {
@@ -164,57 +169,39 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
     setPage(1);
   }, [pageSize]);
 
-
   useEffect(() => {
     const from = (page - 1) * pageSize;
     const to = from + pageSize;
-    const d = sortBy(data, sortStatus.columnAccessor) as ExpenseTableType[];
-    const dd = sortStatus.direction === 'desc' ? d.reverse() : d;
-    let filtered = dd.slice(from, to) as ExpenseTableType[];
-
-    if (debouncedQuery || selectedStatuses.length) {
-      filtered = records
-        .filter(({ driver_id }) => {
-          if(!driver_id?.name) return false
-          if (
-            debouncedQuery !== '' &&
-            !driver_id.name
-              .toLowerCase()
-              .includes(debouncedQuery.trim().toLowerCase())
-          ) {
-            return false;
-          }
-
-          if (
-            selectedStatuses.length &&
-            !selectedStatuses.some((s) => s === status)
-          ) {
-            return false;
-          }
-          return true;
-        })
-        .slice(from, to);
-    }
-    if(debouncedQueryDescription || selectedStatuses.length){
-      filtered = records.filter(({description})=>{
-        if(!description) return false
-        if(debouncedQueryDescription != '' && !description?.toLowerCase().includes(debouncedQueryDescription.trim().toLowerCase())){
-          return false
-        }
-        
-          if (
-            selectedStatuses.length &&
-            !selectedStatuses.some((s) => s === status)
-          ) {
-            return false;
-          }
-          return true;
-      }).slice(from,to)
+    
+    // First sort the data
+    const sortedData = sortBy(data, sortStatus.columnAccessor) as ExpenseTableType[];
+    if (sortStatus.direction === 'desc') {
+      sortedData.reverse();
     }
 
-    setRecords(filtered);
+    // Then apply filters
+    let filteredData = sortedData;
+    
+    if (debouncedQuery) {
+      filteredData = filteredData.filter(({ driver_id }) => {
+        if (!driver_id?.name) return false;
+        return driver_id.name.toLowerCase().includes(debouncedQuery.trim().toLowerCase());
+      });
+    }
+
+    if (debouncedQueryDescription) {
+      filteredData = filteredData.filter(({ description }) => {
+        if (!description) return false;
+        return description.toLowerCase().includes(debouncedQueryDescription.trim().toLowerCase());
+      });
+    }
+
+    // Removed status filtering as 'status' property does not exist in ExpenseTableType
+
+    // Finally apply pagination
+    const paginatedData = filteredData.slice(from, to);
+    setRecords(paginatedData);
   }, [sortStatus, page, pageSize, debouncedQuery, selectedStatuses,debouncedQueryDescription]);
-
   return (<>
     <DeleteExpenseModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>
     <DataTable<ExpenseTableType>
@@ -224,11 +211,7 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
       highlightOnHover
       columns={columns}
       records={records}
-      totalRecords={
-        debouncedQuery || selectedStatuses.length > 0
-          ? records.length
-          : data.length
-      }
+      totalRecords={data.length}
       recordsPerPage={pageSize}
       page={page}
       onPageChange={(p) => setPage(p)}
@@ -236,6 +219,8 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
       onRecordsPerPageChange={setPageSize}
       sortStatus={sortStatus}
       onSortStatusChange={(status) => setSortStatus(status)}
+      fetching={isLoading}
+      noRecordsText={isLoading ? "Loading..." : "No expenses found"}
     />
   </>);
 };
