@@ -3,7 +3,7 @@
 import { createTrip, getVehicleByNumber, updateTrip, updateVehicle } from "@/db/utilis";
 import { TripFormObject } from "@/lib/type";
 
-export default async function (value: TripFormObject){
+export default async function submitTrip(value: TripFormObject){
     console.log("submittrip values:",value)
     if(value.id && value.id > 0){
         value.isRunning = false;
