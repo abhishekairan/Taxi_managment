@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { DashboardLayout } from '@/layout/Dashboard';
+import { DashboardLayout } from '@/components/dashboard/layout';
 
 type Props = {
   children: ReactNode;

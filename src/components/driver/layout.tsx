@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 
 import { AppShell, Container, rem, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useLocalStorage, useMediaQuery } from '@mantine/hooks';
-import { SidebarState } from '@/layout/Dashboard';
+import { SidebarState } from '@/components/dashboard/layout';
 
 import AppMain from '@/components/AppMain/';
 import HeaderNav from '@/components/HeaderNav';

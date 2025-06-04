@@ -29,7 +29,7 @@ const Logo = ({ href, showText = true, ...others }: LogoProps) => {
           width={showText ? 32 : 24}
           alt="design sparx logo"
         />
-        {showText && <Text fw={700}>Mantine admin</Text>}
+        {showText && <Text fw={700}>TaxiYo</Text>}
       </Group>
     </UnstyledButton>
   );

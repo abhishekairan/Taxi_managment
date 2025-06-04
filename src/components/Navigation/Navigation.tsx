@@ -4,7 +4,7 @@ import { ActionIcon, Box, Flex, Group, ScrollArea, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconX } from '@tabler/icons-react';
 
-import { SidebarState } from '@/layout/Dashboard';
+import { SidebarState } from '@/components/dashboard/layout';
 import Logo from '@/components/Logo/Logo';
 import { LinksGroup } from '@/components/Navigation/Links/Links';
 import classes from './Navigation.module.css';

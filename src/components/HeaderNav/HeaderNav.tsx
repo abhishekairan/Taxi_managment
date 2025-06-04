@@ -27,7 +27,7 @@ import {
   IconSunHigh,
 } from '@tabler/icons-react';
 
-import { SidebarState } from '@/layout/Dashboard';
+import { SidebarState } from '@/components/dashboard/layout';
 import { useRouter } from 'next/navigation';
 
 const ICON_SIZE = 20;
