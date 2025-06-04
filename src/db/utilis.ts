@@ -3,6 +3,7 @@ import db from './index';
 import { users, vehicles, trips, expense } from './schema';
 import { eq,and } from 'drizzle-orm';
 import { ExpenseDBSchema, ExpenseDBType, TripsDBSchema, TripsDBType, UserDBType, UsersDBSchema, VehcileDBSchema, VehicleDBType } from '@/lib/type';
+import { act } from 'react';
 
 // ===== Helper functions =====
 
@@ -67,12 +68,21 @@ export async function getAllDrivers() {
 }
 
 export async function getDriver(id: number) {
-  const result = await db.select({id: users.id,name: users.name,email:users.email}).from(users).where(eq(users.id, id));
+  const result = await db.select({id: users.id,name: users.name,email:users.email,profile_image:users.profile_image,phone_number: users.phone_number}).from(users).where(eq(users.id, id));
   const driver = result[0];
   if (!driver) return null;
   return driver;
 }
 
+export async function getActiveDriver(){
+  const active_trips = await getActiveTrips()
+  if(!active_trips || active_trips.length<1) return null
+  const driverIds = await Promise.all(active_trips.map(async (trip) => {
+    const d̥river = await getDriver(trip.driver_id);
+    return d̥river;
+  }))
+  return driverIds  
+}
 // ===== Vehicles =====
 export async function getAllVehicles() {
   const rows = await db.select().from(vehicles);
@@ -130,7 +140,8 @@ export async function getActiveTripByDriverId(driverId: number) {
 
 export async function getActiveTrips(){
   const result = await db.select().from(trips).where(eq(trips.isRunning, true));
-  return result[0] ?? null;
+  // console.log("Active Trips",result)
+  return result ?? null;
 }
 
 
