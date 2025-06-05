@@ -5,30 +5,35 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TripFormObject, TripFormSchema } from '@/lib/type';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import submitTrip from '@/app/actions/submitTrip';
 import { useUserContext } from '@/context/UserContext';
 import { get } from 'lodash';
 
-// Getting vehicles
-const fetchVehicles = async () => {
-  const response = await fetch(new URL('/api/vehicle', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
-  const data = await response.json();
-  // console.log("vehicle data:",data);
-  if (data) {
-    return data.map((v: any) => ({
-      value: v.vehicle_number,
-      label: v.vehicle_number
-    }));
-  }
-  return [];
-};
-const vehicleSelect = await fetchVehicles();
-
 const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
-  // console.log(data)
   const router = useRouter();
   const { user } = useUserContext();
+  const [vehicleSelect, setVehicleSelect] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await fetch(new URL('/api/vehicle', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+        const vehicleData = await response.json();
+        if (vehicleData) {
+          const options = vehicleData.map((v: any) => ({
+            value: v.vehicle_number,
+            label: v.vehicle_number
+          }));
+          setVehicleSelect(options);
+        }
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
 
   const {
     formState: { errors },

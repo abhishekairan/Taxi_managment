@@ -42,7 +42,7 @@ type ExpenseTableProps = {
   editData: any
 };
 
-const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableProps) => {
+export default function ExpenseTable({ setEditData, editModelHandler, editData }: ExpenseTableProps) {
   const {user} = useUserContext()
   const [data, setData] = useState<ExpenseTableType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -227,5 +227,3 @@ const ExpenseTable = ({ setEditData, editModelHandler, editData }: ExpenseTableP
     />
   </>);
 };
-
-export default ExpenseTable;

@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { TripFormObject, TripFormSchema, VehicleDBType } from "@/lib/type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import submitTrip from "@/app/actions/submitTrip";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAllVehicles } from "@/db/utilis";
 
 const PAPER_PROPS: PaperProps = {
@@ -31,21 +31,28 @@ const PAPER_PROPS: PaperProps = {
   style: { height: "100%" },
 };
 
-
-// Getting vehicles
-const vehiclesResponse = await (
-  await fetch(new URL("/api/vehicle",process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
-).json();
-let vehicles: { value: string; label: string }[] | null = null; // variable to store all vehicle id and vehicle number
-if (vehiclesResponse) {
-  vehicles = vehiclesResponse.map((v: VehicleDBType) => {
-    return { value: v.vehicle_number, label: v.vehicle_number };
-  });
-}
-
 const TripForm = ({ formData }: any) => {
-  // Getting Active Trip
-  // const [formData, setformData] = useState<TripsDBType>();
+  const [vehicles, setVehicles] = useState<{ value: string; label: string }[]>([]);
+  const [vehiclesData, setVehiclesData] = useState<VehicleDBType[]>([]);
+
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await fetch(new URL("/api/vehicle", process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+        const vehiclesResponse = await response.json();
+        setVehiclesData(vehiclesResponse);
+        const vehicleOptions = vehiclesResponse.map((v: VehicleDBType) => ({
+          value: v.vehicle_number,
+          label: v.vehicle_number
+        }));
+        setVehicles(vehicleOptions);
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
 
   // react-hook-form
   const {
@@ -60,10 +67,9 @@ const TripForm = ({ formData }: any) => {
     defaultValues: formData
   });
 
-
   // On Change handler for select menu
   const onChangeVehiclee = (value: string | null, obj: ComboboxItem) => {
-    const vehicleObj = vehiclesResponse.find((e: VehicleDBType) => {
+    const vehicleObj = vehiclesData.find((e: VehicleDBType) => {
       return e.vehicle_number === value;
     });
     if(vehicleObj){ 
@@ -71,10 +77,9 @@ const TripForm = ({ formData }: any) => {
       setValue("to_location", vehicleObj.default_to_location || '') ;
       setValue("start_reading", vehicleObj.speedometer_reading || 0);
       setValue("passenger_name", vehicleObj.default_passenger || '');
-      setValue('vehicle_number',value || '')
+      setValue('vehicle_number', value || '');
     }
   };
-
 
   // On Submit Function
   const OnSubmitTripForm = async (values: TripFormObject) => {
