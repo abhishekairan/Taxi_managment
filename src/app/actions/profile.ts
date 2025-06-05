@@ -12,7 +12,6 @@ import { getUserByEmail } from '@/db/utilis';
 
 
 export async function updateProfile(formData: ProfileFormType) {
-  const cookieStore = await cookies();
   console.log('formData:', formData);
   const validatedFields = ProfileFormSchema.safeParse(formData);
   const user = await getUserByEmail(formData.email);
@@ -39,18 +38,17 @@ export async function updateProfile(formData: ProfileFormType) {
     const updatedUser = await db
       .select()
       .from(users)
-      .where(eq(users.id, Number(user?.id)))
-      .get();
+      .where(eq(users.id, Number(user?.id)));
 
-    if (updatedUser) {
+    if (updatedUser && updatedUser.length > 0) {
       // Create new session with updated user data
-      await createSession(updatedUser);
+      await createSession(updatedUser[0]);
     }
 
     revalidatePath('/driver/profile');
     revalidatePath('/dashboard/profile');
     
-    return { success: true, user: updatedUser };
+    return { success: true, user: updatedUser[0] };
   } catch (error) {
     console.error('Profile update error:', error);
     return { error: 'Failed to update profile' };

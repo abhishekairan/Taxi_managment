@@ -21,11 +21,10 @@ export async function GET() {
         }
 
         // Fetch complete user data from database
-        const user = await db
+        const user =( await db
             .select()
             .from(users)
-            .where(eq(users.id, parseInt(userData.userId)))
-            .get();
+            .where(eq(users.id, parseInt(userData.userId))))[0];
 
         if (!user) {
             return NextResponse.json({ user: null });

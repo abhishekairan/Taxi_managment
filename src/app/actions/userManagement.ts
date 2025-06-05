@@ -118,10 +118,9 @@ export async function getUser(userId: number) {
     const user = await db
       .select()
       .from(users)
-      .where(eq(users.id, userId))
-      .get();
+      .where(eq(users.id, userId));
 
-    return user;
+    return user[0];
   } catch (error) {
     console.error('Get user error:', error);
     return null;
