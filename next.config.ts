@@ -1,11 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',  // Required for static site generation
+  reactStrictMode: true,
   basePath: '/Taxi_managment', // Replace with your repository name
-  images: {
-    unoptimized: true, // Required for static export
-  },
   allowedDevOrigins: ['*'],
 };
 
