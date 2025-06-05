@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server';
 import db from './index';
 import { users, vehicles, trips, expense } from './schema';
 import { eq,and } from 'drizzle-orm';
-import { ExpenseDBSchema, ExpenseDBType, TripsDBSchema, TripsDBType, UserDBType, UsersDBSchema, VehcileDBSchema, VehicleDBType } from '@/lib/type';
-import { act } from 'react';
+import { ExpenseDBType, TripsDBType, UserDBType, VehicleDBType } from '@/lib/type';
 
 // ===== Helper functions =====
 
@@ -39,9 +37,9 @@ export async function getUserByEmail(id: string) {
 }
 
 export async function createUser(data: typeof users.$inferInsert) {
-  const response = await db.insert(users).values(data);
-  if (!response.lastInsertRowid) return null
-  const row = await getUser(Number(response.lastInsertRowid))
+  const {id} = (await db.insert(users).values(data).$returningId())[0];
+  if (!id) return null
+  const row = await getUser(Number(id))
   return row
 }
 
@@ -106,9 +104,9 @@ export async function deleteVehicle(id: number) {
 
 export async function createVehicle(data: VehicleDBType) {
   console.log(data)
-  const response = await db.insert(vehicles).values(data);
-  if(!response) return null
-  const row = await getVehicle(Number(response.lastInsertRowid))
+  const {id} = (await db.insert(vehicles).values(data).$returningId())[0];
+  if(!id) return null
+  const row = await getVehicle(id)
   if(row) return row
   return null
 }
@@ -116,10 +114,8 @@ export async function createVehicle(data: VehicleDBType) {
 export async function updateVehicle(vehicle: VehicleDBType) {
   if(!vehicle.id) return null
   const response = await db.update(vehicles).set(vehicle).where(eq(vehicles.id, vehicle.id));
-  if(!response) return null
   const row = await getVehicleById(vehicle.id) 
-  if(response.changes>0) return row
-  return null
+  if(row) return row
 }
 
 
@@ -133,7 +129,7 @@ export async function getAllTrips() {
 }
 
 export async function getActiveTripByDriverId(driverId: number) {
-  const result =await db.select().from(trips).where(and(eq(trips.driver_id, Number(driverId)),eq(trips.isRunning,true))).get();
+  const result =await db.select().from(trips).where(and(eq(trips.driver_id, Number(driverId)),eq(trips.isRunning,true)));
   if (!result) return null;
   return result
 }
@@ -155,9 +151,9 @@ export async function getTrip(id: number) {
 export async function createTrip(data: TripsDBType) {
 
   await db.update(vehicles).set({speedometer_reading:data.start_reading}).where(eq(vehicles.vehicle_number,data.vehicle_number))
-  const response = await db.insert(trips).values(data);
-  if(response.lastInsertRowid){
-    const newField = await getTrip(Number(response.lastInsertRowid))
+  const {id} = (await db.insert(trips).values(data).$returningId())[0];
+  if(id){
+    const newField = await getTrip(id)
     if(newField) return newField
   }
   return null
@@ -193,20 +189,20 @@ export async function getExpense(id: number) {
 
 export async function getExpenseByDriverId(id: number) {
   const result = await db.select().from(expense).where(eq(expense.driver_id, id));
-  if(result.length>0) return result
+  if(result.length>0) return result[0]
   return null
 }
 
 export async function getExpensesByTripId(tripId: number) {
   const result = await db.select().from(expense).where(eq(expense.trip_id, tripId));
   if (!result) return null;
-  return result
+  return result[0]
 }
 
 export async function createExpense(data: ExpenseDBType) {
-  const response = await db.insert(expense).values(data);
-  if(response.lastInsertRowid>0){
-    const newField = await getExpense(Number(response.lastInsertRowid))
+  const {id} = (await db.insert(expense).values(data).$returningId())[0];
+  if(id){
+    const newField = await getExpense(id)
     return newField
   }
   return null
@@ -215,11 +211,9 @@ export async function createExpense(data: ExpenseDBType) {
 export async function updateExpense(updates: ExpenseDBType) {
   if(!updates.id) return null
   const response = await db.update(expense).set(updates).where(eq(expense.id, updates.id));
-  // console.log(response)
-  if(response.changes>0){
-    const row = await getExpense(updates.id)
-    if(row) return row 
-  }
+  console.log(response)
+  const row = await getExpense(updates.id)
+  if(row) return row 
   return null
 }
 

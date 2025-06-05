@@ -22,8 +22,7 @@ export async function POST(req: NextRequest) {  const { formData } = await req.j
       const existingUser = await db
         .select()
         .from(users)
-        .where(eq(users.email, email))
-        .get();
+        .where(eq(users.email, email));
       if (existingUser) {
         // return res.status(409).json({ message: 'User already exists' });
         return NextResponse.json(
@@ -34,22 +33,21 @@ export async function POST(req: NextRequest) {  const { formData } = await req.j
       // Hash the password
       const password_hash = await bcrypt.hash(password, 10);
 
-      const dbresponse = await db
+      const dbresponse = (await db
         .insert(users)
         .values({
           email: email,
           password_hash: password_hash,
           role: role ? role : "admin",
           name: name ? name : "User",
-        })
-        .run();
+        }).$returningId())[0];
 
-      const user = db
+      const userArr = await db
         .select()
         .from(users)
-        .where(eq(users.id, Number(dbresponse.lastInsertRowid)))
-        .get();
+        .where(eq(users.id, Number(dbresponse)));
 
+      const user = userArr[0];
       if (!user) return;
       
       const session_token = await createSession(user);

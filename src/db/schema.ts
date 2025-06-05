@@ -1,49 +1,56 @@
 import { sql } from "drizzle-orm";
-import { int, sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import {
+  mysqlTable,
+  int,
+  varchar,
+  timestamp,
+  boolean,
+  text,
+} from "drizzle-orm/mysql-core";
 
 
-export const users = sqliteTable('users', {
-  id: int('id').primaryKey(),
-  name: text('name'),
-  email: text('email').unique(),
-  password_hash: text('password_hash'),
-  role: text('role'),
-  session_token: text('session_token'),
-  profile_image: text('profile_image'),
-  phone_number: text('phone_number'),
-  created_at: text('created_at').default(sql`(current_timestamp)`),
-  updated_at: text('updated_at').default(sql`(current_timestamp)`)
+export const users = mysqlTable('users', {
+  id: int('id').primaryKey().autoincrement(),
+  name: varchar('name', { length: 255 }),
+  email: varchar('email', { length: 255 }).unique(),
+  password_hash: varchar('password_hash', { length: 255 }),
+  role: varchar('role', { length: 50 }),
+  session_token: varchar('session_token', { length: 255 }),
+  profile_image: varchar('profile_image', { length: 255 }),
+  phone_number: varchar('phone_number', { length: 20 }),
+  created_at: varchar('created_at', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
+  updated_at: varchar('updated_at', {length: 50}).default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
 });
 
-export const vehicles = sqliteTable('vehicles', {
-  id: int('id').primaryKey(),
-  vehicle_number: text('vehicle_number').notNull().unique(),
+export const vehicles = mysqlTable('vehicles', {
+  id: int('id').primaryKey().autoincrement(),
+  vehicle_number: varchar('vehicle_number', { length: 50 }).notNull().unique(),
   speedometer_reading: int('speedometer_reading'),
-  default_passenger: text('default_passenger'),
-  default_from_location: text('default_from_location'),
-  default_to_location: text('default_to_location'),
+  default_passenger: varchar('default_passenger', { length: 255 }),
+  default_from_location: varchar('default_from_location', { length: 255 }),
+  default_to_location: varchar('default_to_location', { length: 255 }),
 });
 
 
-export const trips = sqliteTable('trips', {
-  id: int('id').primaryKey(),
+export const trips = mysqlTable('trips', {
+  id: int('id').primaryKey().autoincrement(),
   driver_id: int('driver_id').notNull().references(() => users.id),
-  vehicle_number: text('vehicle_number').notNull().references(() => vehicles.vehicle_number),
-  passenger_name: text('passenger_name').notNull(),
-  from_location: text('from_location').notNull(),
-  to_location: text('to_location').notNull(),
+  vehicle_number: varchar('vehicle_number', { length: 50 }).notNull().references(() => vehicles.vehicle_number),
+  passenger_name: varchar('passenger_name', { length: 255 }).notNull(),
+  from_location: varchar('from_location', { length: 255 }).notNull(),
+  to_location: varchar('to_location', { length: 255 }).notNull(),
   start_reading: int('start_reading').notNull(),
   end_reading: int('end_reading'),
-  start_time: text('start_time').default(sql`(current_timestamp)`),
-  end_time: text('end_time'),
-  isRunning: integer('running', {mode: 'boolean'}).default(true),
+  start_time: varchar('start_time', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
+  end_time: varchar('end_time', {length: 50}),
+  isRunning: boolean('running').default(true),
 })
 
-export const expense = sqliteTable('expense', {
-  id: int('id').primaryKey(),
+export const expense = mysqlTable('expense', {
+  id: int('id').primaryKey().autoincrement(),
   driver_id: int('driver_id').references(() => users.id),
   trip_id: int('trip_id').references(() => trips.id),
   amount: int('amount'),
   description: text('description'),
-  created_at: text('created_at').default(sql`(current_timestamp)`),
+  created_at: varchar('created_at', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
 })

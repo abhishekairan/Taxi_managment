@@ -45,11 +45,10 @@ export const handleSubmit = async (prevstate: FormState, form: FormData) => {
   //   body: data
   // })
   // --!!--
-    const user = await db
+    const user = (await db
       .select()
       .from(users)
-      .where(eq(users.email, email))
-      .get();
+      .where(eq(users.email, email)))[0];
     if (!user || !user.password_hash) {
       return {
         errors: { email: ["User not found"] },
@@ -67,8 +66,7 @@ export const handleSubmit = async (prevstate: FormState, form: FormData) => {
     await db
       .update(users)
       .set({ session_token: null })
-      .where(eq(users.id, user.id))
-      .run();
+      .where(eq(users.id, user.id));
 
     // Create new session
     const session_token = await createSession(user);
@@ -77,8 +75,7 @@ export const handleSubmit = async (prevstate: FormState, form: FormData) => {
     await db
       .update(users)
       .set({ session_token: session_token })
-      .where(eq(users.id, user.id))
-      .run();
+      .where(eq(users.id, user.id));
 
     if(user.role === "admin") {
       redirect("/dashboard");
