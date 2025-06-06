@@ -14,8 +14,10 @@ const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;
 
 const fetchData = async () => {
-  const trips = await fetch(new URL('/api/trip', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+  console.log('Fetching trip data...');
+  const trips = await fetch('/api/trip');
   const tripsData = await trips.json();
+  console.log('Fetched trips data:', tripsData);
   return tripsData || [];
 };
 
@@ -33,6 +35,7 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
     columnAccessor: 'id',
     direction: 'desc',
   });
+  console.log('Current sort status:', sortStatus);
   const [queryVehicle, setQueryVehicle] = useState('');
   const [queryPassenger, setQueryPassenger] = useState('');
   const [debouncedQueryVehicle] = useDebouncedValue(queryVehicle, 200);
@@ -40,16 +43,22 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
 
   // State for handling delete modal
   const [deleteOpened, DeleteModelHandler] = useDisclosure(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  useEffect(() => {
+  const [deleteId, setDeleteId] = useState<number | null>(null);  useEffect(() => {
     const updateRecords = async() => {
+      console.log('Updating records with filters:', { 
+        page, 
+        pageSize, 
+        vehicleQuery: debouncedQueryVehicle, 
+        passengerQuery: debouncedQueryPassenger,
+        userRole: user?.role
+      });
       const data = await fetchData();
       let filteredData = data;
-      
-      // Filter by user if driver
+        // Filter by user if driver
       if(user?.role.toLowerCase() === 'driver') {
+        console.log('Filtering for driver with ID:', user.userId);
         filteredData = data.filter((item: TripTableType) => item.driver_id.id === Number(user.userId));
-        // console.log("User is a driver, filtered trips by user ID:", data);
+        console.log('Filtered trips for driver:', filteredData);
 
       }
 
@@ -64,9 +73,8 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
         filteredData = filteredData.filter((item: TripTableType) => 
           item.passenger_name.toLowerCase().includes(debouncedQueryPassenger.toLowerCase())
         );
-      }
-
-      // Apply sorting
+      }      // Apply sorting
+      console.log('Applying sort:', { column: sortStatus.columnAccessor, direction: sortStatus.direction });
       const sortedData = [...filteredData].sort((a, b) => {
         const aValue = a[sortStatus.columnAccessor as keyof TripTableType];
         const bValue = b[sortStatus.columnAccessor as keyof TripTableType];
@@ -84,11 +92,12 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
           ? Number(aValue) - Number(bValue)
           : Number(bValue) - Number(aValue);
       });
-      
-      // Apply pagination
+        // Apply pagination
       const from = (page - 1) * pageSize;
       const to = from + pageSize;
-      setRecords(sortedData.slice(from, to));
+      const paginatedData = sortedData.slice(from, to);
+      console.log('Paginated data:', { from, to, recordCount: paginatedData.length });
+      setRecords(paginatedData);
     };
     updateRecords();
   }, [editData, deleteId, user, pageSize, debouncedQueryVehicle, debouncedQueryPassenger, sortStatus, page]);
@@ -173,20 +182,19 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       accessor: 'actions',
       title: 'Actions',
       render: (record: TripTableType) => (
-        <Group gap="sm">
-          <Tooltip label="Edit Trip">
+        <Group gap="sm">          <Tooltip label="Edit Trip">
             <ActionIcon 
               onClick={() => {
-                // console.log("record to be set for editing:",record)
+                console.log('Editing trip:', record);
                 setEditData({...record, driver_id: record.driver_id.id});
                 editModelHandler.open();
               }}>
               <IconPencil color='green' size={ICON_SIZE} />
             </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Delete Trip">
+          </Tooltip>          <Tooltip label="Delete Trip">
             <ActionIcon
               onClick={() => {
+                console.log('Deleting trip with ID:', record.id);
                 setDeleteId(record.id || null);
                 DeleteModelHandler.open();
               }}>
@@ -197,7 +205,12 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       ),
     },
   ];
-
+  console.log('Rendering TripTable with:', { 
+    recordCount: records.length, 
+    currentPage: page,
+    pageSize,
+    filters: { vehicle: queryVehicle, passenger: queryPassenger }
+  });
   return (<>
     <DeleteTripModal opened={deleteOpened} Modelhandler={DeleteModelHandler} id={deleteId} setId={setDeleteId}/>    
     <DataTable<TripTableType>
@@ -209,10 +222,15 @@ const TripTable = ({ setEditData, editModelHandler, editData }: TripTableProps) 
       records={records}
       totalRecords={records.length}
       recordsPerPage={pageSize}
-      page={page}
-      onPageChange={(p) => setPage(p)}
+      page={page}      onPageChange={(p) => {
+        console.log('Page changed to:', p);
+        setPage(p);
+      }}
       recordsPerPageOptions={PAGE_SIZES}
-      onRecordsPerPageChange={setPageSize}
+      onRecordsPerPageChange={(size) => {
+        console.log('Page size changed to:', size);
+        setPageSize(size);
+      }}
       sortStatus={sortStatus}
       onSortStatusChange={setSortStatus}
     />

@@ -28,7 +28,7 @@ const EditExpenseModal = ({ opened, Modelhandler, data, setData }: any) => {
     const fetchData = async () => {
       try {
         // Fetch drivers
-        const driversResponse = await fetch(new URL('/api/user/driver', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+        const driversResponse = await fetch('/api/user/driver');
         const drivers = await driversResponse.json();
         const driverOptions = drivers.map((d: DriverUserType) => ({
           value: String(d.id),
@@ -37,7 +37,7 @@ const EditExpenseModal = ({ opened, Modelhandler, data, setData }: any) => {
         setDriverSelect(driverOptions);
 
         // Fetch trips
-        const tripsResponse = await fetch(new URL('/api/trip', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+        const tripsResponse = await fetch('/api/trip');
         const trips = await tripsResponse.json();
         const tripOptions = trips.map((v: TripsDBType) => ({
           value: String(v.id),

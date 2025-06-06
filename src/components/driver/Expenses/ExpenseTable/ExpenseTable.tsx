@@ -29,7 +29,7 @@ const PAGE_SIZES = [5, 10, 20];
 const ICON_SIZE = 18;
 
 const fetchData = async () => {
-  const expenses = await fetch(new URL('/api/expenses', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'))
+  const expenses = await fetch('/api/expenses')
   const expensesData = await expenses.json()
   return expensesData || []
 }

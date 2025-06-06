@@ -18,7 +18,7 @@ const EditTripModal = ({ opened, Modelhandler, data, setData }: any) => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await fetch(new URL('/api/vehicle', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'));
+        const response = await fetch('/api/vehicle');
         const vehicleData = await response.json();
         if (vehicleData) {
           const options = vehicleData.map((v: any) => ({

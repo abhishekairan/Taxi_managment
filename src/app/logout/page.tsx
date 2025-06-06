@@ -14,7 +14,7 @@ const route = async () => {
   }
     // Call the API route to delete the session
   try {
-    const response = await fetch(new URL('/api/logout', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'), {
+    const response = await fetch('/api/logout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
