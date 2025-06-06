@@ -29,16 +29,19 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
     columnAccessor: 'id',
     direction: 'desc',
   });
+  console.log('Current sort status:', sortStatus);
   const [queryDriver, setQueryDriver] = useState('');
   const [queryDescription, setQueryDescription] = useState('');
 
   // Load expenses and apply filters
   useEffect(() => {
     const loadExpenses = async () => {
+      console.log('Loading expenses with filters:', { queryDriver, queryDescription, page, pageSize });
       setIsLoading(true);
       try {
         const response = await fetch('/api/expenses');
         const fetchedExpenses = await response.json();
+        console.log('Fetched expenses:', fetchedExpenses);
         let filteredExpenses = fetchedExpenses;
 
         // Apply search filters
@@ -55,6 +58,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
         }
 
         // Store all filtered records
+        console.log('Filtered expenses:', filteredExpenses);
         setAllRecords(filteredExpenses);
 
         // Apply sorting
@@ -79,7 +83,9 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
         // Apply pagination
         const from = (page - 1) * pageSize;
         const to = from + pageSize;
-        setRecords(sortedExpenses.slice(from, to));
+        const paginatedRecords = sortedExpenses.slice(from, to);
+        console.log('Paginated records:', { from, to, records: paginatedRecords });
+        setRecords(paginatedRecords);
       } catch (error) {
         console.error('Error loading expenses:', error);
         notifications.show({
@@ -97,6 +103,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
 
   // Handle expense deletion
   const handleDelete = async (expenseId: number) => {
+    console.log('Attempting to delete expense:', expenseId);
     if (window.confirm('Are you sure you want to delete this expense?')) {
       setIsLoading(true);
       try {
@@ -132,6 +139,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
   };
 
   const handleExportPDF = () => {
+    console.log('Exporting expenses to PDF, records:', records);
     const doc = new jsPDF();
     
     // Add title
@@ -200,7 +208,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
           onChange={(e) => setQueryDriver(e.currentTarget.value)}
         />
       ),
-      render: ({driver_id}: any) => <Text>{driver_id.name || 'N/A'}</Text>,
+      render: ({driver_id}: any) => <Text>{driver_id?.name || 'N/A'}</Text>,
       filtering: queryDriver !== '',
     },
     {
@@ -248,6 +256,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
               variant="subtle"
               color="blue"
               onClick={() => {
+                console.log('Editing expense:', expense);
                 setEditData(expense);
                 editModelHandler.open();
               }}
@@ -281,6 +290,7 @@ export default function ExpenseTable({ setEditData, editModelHandler, refreshTri
     );
   }
 
+  console.log('Rendering ExpenseTable with:', { records, allRecords, pageSize, page });
   return (
     <Stack gap="md">
       <Group justify="flex-end">

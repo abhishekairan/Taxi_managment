@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ActionIcon,
   Avatar,
   Flex,
   Group,
@@ -42,17 +41,15 @@ const ActiveDriverPie = ({ ...others }: ActiveDriverPieProps) => {
     const fetchData = async () => {
       const allDrivers = await fetch('/api/user/driver/');
       const alldata = await allDrivers.json();
-      if (!alldata) return;
-      setdrivers(alldata);
+      if (alldata) setdrivers(alldata);
       const activeDrivers = await fetch('/api/user/driver/active');
       const data = await activeDrivers.json();
-      if(!data) return
-      setActiveDrivers(data);
+      console.log("Active Drivers Data",data)
+      if(data != "User not found") setActiveDrivers(data);
       const activeTripsResponse = await fetch('/api/trip/activetrip');
-      const activeTripsData = await activeTripsResponse.json();
+      const activeTripsData = await activeTripsResponse.json(); 
       console.log("Active Trips Data",activeTripsData)
-      if(!activeTripsData) return
-      setActiveTrips(activeTripsData);
+      if(activeTripsData != "No active trips found") setActiveTrips(activeTripsData);
       const allVehicles = await fetch('/api/vehicle')
       const allvehicleData = await allVehicles.json()
       setCars(allvehicleData)
@@ -226,7 +223,7 @@ const ActiveDriverPie = ({ ...others }: ActiveDriverPieProps) => {
         <DataTable<TripTableType>
           highlightOnHover
           columns={columns}
-          records={activeTrips.slice(0, 4)}
+          records={activeTrips.length > 1 ? activeTrips.slice(0, 4): []}
           height={200}
           />
     </Surface>

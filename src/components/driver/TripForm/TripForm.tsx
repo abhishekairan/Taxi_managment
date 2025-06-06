@@ -7,7 +7,6 @@ import {
   Container,
   Grid,
   Group,
-  NumberInput,
   Paper,
   PaperProps,
   Select,
