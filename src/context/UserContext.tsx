@@ -32,6 +32,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         },
       });
       const data = await response.json();
+      // console.log("Got Data regarding user: ",data)
       if (data.user) {
         setUser(data.user);
       } else {

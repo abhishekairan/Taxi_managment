@@ -131,7 +131,7 @@ export async function getAllTrips() {
 export async function getActiveTripByDriverId(driverId: number) {
   const result =await db.select().from(trips).where(and(eq(trips.driver_id, Number(driverId)),eq(trips.isRunning,true)));
   if (!result) return null;
-  return result
+  return result[0]
 }
 
 export async function getActiveTrips(){

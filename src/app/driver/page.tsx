@@ -11,10 +11,13 @@ function Page() {
 
   useEffect(() => {
     const fetchTripData = async () => {
+      console.log("User obj: ",user)
       if (user?.userId) {
         try {
+          console.log("Fetching activetrip...")
           const response = await fetch(`/api/trip/activetrip/${user.userId}`);
           const data = await response.json();
+          console.log("Fetched Active Trip: ",data)
           setTripData(data);
         } catch (error) {
           console.error('Error fetching trip data:', error);

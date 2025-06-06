@@ -11,6 +11,7 @@ import {
   Paper,
   PaperProps,
   Select,
+  Skeleton,
   Stack,
   Text,
   TextInput,
@@ -22,7 +23,6 @@ import { TripFormObject, TripFormSchema, VehicleDBType } from "@/lib/type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import submitTrip from "@/app/actions/submitTrip";
 import { useEffect, useState } from "react";
-import { getAllVehicles } from "@/db/utilis";
 
 const PAPER_PROPS: PaperProps = {
   p: "md",
@@ -32,6 +32,7 @@ const PAPER_PROPS: PaperProps = {
 };
 
 const TripForm = ({ formData }: any) => {
+  console.log("FormData: ",formData)
   const [vehicles, setVehicles] = useState<{ value: string; label: string }[]>([]);
   const [vehiclesData, setVehiclesData] = useState<VehicleDBType[]>([]);
 
@@ -64,7 +65,7 @@ const TripForm = ({ formData }: any) => {
     reset,
   } = useForm<TripFormObject>({
     resolver: zodResolver(TripFormSchema),
-    defaultValues: formData
+    defaultValues: {...formData}
   });
 
   // On Change handler for select menu
@@ -110,6 +111,7 @@ const TripForm = ({ formData }: any) => {
           <Stack gap="lg">
             <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
               <Grid.Col span={{ base: 12, md: 4 }}>
+                <Skeleton visible={isSubmitting}>
                 <Surface component={Paper} {...PAPER_PROPS}>
                   <Stack>
                     <Group>
@@ -276,6 +278,7 @@ const TripForm = ({ formData }: any) => {
                     </Group>
                   </Stack>
                 </Surface>
+                </Skeleton>
               </Grid.Col>
             </Grid>
           </Stack>
