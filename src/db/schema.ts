@@ -8,18 +8,17 @@ import {
   text,
 } from "drizzle-orm/mysql-core";
 
-
 export const users = mysqlTable('users', {
   id: int('id').primaryKey().autoincrement(),
   name: varchar('name', { length: 255 }),
   email: varchar('email', { length: 255 }).unique(),
   password_hash: varchar('password_hash', { length: 255 }),
   role: varchar('role', { length: 50 }),
-  session_token: varchar('session_token', { length: 255 }),
+  session_token: varchar('session_token', { length: 500 }),
   profile_image: varchar('profile_image', { length: 255 }),
   phone_number: varchar('phone_number', { length: 20 }),
-  created_at: varchar('created_at', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
-  updated_at: varchar('updated_at', {length: 50}).default(sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`),
+  created_at: varchar('created_at',{ length: 50 }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updated_at: varchar('updated_at',{ length: 50 }).notNull().default(sql`CURRENT_TIMESTAMP`)
 });
 
 export const vehicles = mysqlTable('vehicles', {
@@ -28,9 +27,8 @@ export const vehicles = mysqlTable('vehicles', {
   speedometer_reading: int('speedometer_reading'),
   default_passenger: varchar('default_passenger', { length: 255 }),
   default_from_location: varchar('default_from_location', { length: 255 }),
-  default_to_location: varchar('default_to_location', { length: 255 }),
+  default_to_location: varchar('default_to_location', { length: 255 })
 });
-
 
 export const trips = mysqlTable('trips', {
   id: int('id').primaryKey().autoincrement(),
@@ -41,10 +39,10 @@ export const trips = mysqlTable('trips', {
   to_location: varchar('to_location', { length: 255 }).notNull(),
   start_reading: int('start_reading').notNull(),
   end_reading: int('end_reading'),
-  start_time: varchar('start_time', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
-  end_time: varchar('end_time', {length: 50}),
-  isRunning: boolean('running').default(true),
-})
+  start_time: varchar('start_time',{ length: 50 }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  end_time: varchar('end_time',{ length: 50 }),
+  isRunning: boolean('running').default(true)
+});
 
 export const expense = mysqlTable('expense', {
   id: int('id').primaryKey().autoincrement(),
@@ -52,5 +50,5 @@ export const expense = mysqlTable('expense', {
   trip_id: int('trip_id').references(() => trips.id),
   amount: int('amount'),
   description: text('description'),
-  created_at: varchar('created_at', {length: 50}).default(sql`CURRENT_TIMESTAMP`),
-})
+  created_at: varchar('created_at',{ length: 50 }).notNull().default(sql`CURRENT_TIMESTAMP`)
+});

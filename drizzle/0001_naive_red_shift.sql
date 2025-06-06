@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `session_token` varchar(500);

@@ -78,7 +78,7 @@ export const ExpenseDBSchema = z.object({
   trip_id: z.coerce.number().nullable(),
   amount: z.coerce.number().nullable(),
   description: z.string().nullable(),
-  created_at: z.string().nullable().optional(),
+  created_at: z.string().optional(),
 })
 // Expense Type
 export type ExpenseDBType = z.infer<typeof ExpenseDBSchema>

@@ -1,40 +1,19 @@
 {
   "version": "7",
-  "dialect": "sqlite",
+  "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1747833135150,
-      "tag": "0000_steep_silhouette",
+      "version": "5",
+      "when": 1749176434760,
+      "tag": "0000_lying_infant_terrible",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "6",
-      "when": 1747849284605,
-      "tag": "0001_chief_nitro",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1748059114748,
-      "tag": "0002_lean_banshee",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1748059171062,
-      "tag": "0003_brave_zarda",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1748059253391,
-      "tag": "0004_material_mastermind",
+      "version": "5",
+      "when": 1749177579793,
+      "tag": "0001_naive_red_shift",
       "breakpoints": true
     }
   ]
